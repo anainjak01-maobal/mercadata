@@ -45,7 +45,7 @@
       o.pico = o.uni ? DIAS[o.dow.indexOf(Math.max.apply(null, o.dow))] : "—";
       o.lunJue = A.semanasN ? (o.dow[0] + o.dow[1] + o.dow[2] + o.dow[3]) / A.semanasN : 0;
       o.vieDom = A.semanasN ? (o.dow[4] + o.dow[5] + o.dow[6]) / A.semanasN : 0;
-      o.estado = o.semana <= maxQ ? "Pausar" : (o.pctFinde >= maxFin ? "Reforzar" : (o.pctDias >= minD ? "Firme" : "Normal"));
+      o.estado = o.uni === 0 ? "Sin ventas" : o.semana <= maxQ ? "Pausar" : (o.pctFinde >= maxFin ? "Reforzar" : (o.pctDias >= minD ? "Firme" : "Normal"));
       return o;
     });
     A.prod.sort(function (a, b) { return b.uni - a.uni; });

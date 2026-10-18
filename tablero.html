@@ -58,6 +58,7 @@ tfoot td { border-top: 2px solid var(--ink); border-bottom: 0; font-weight: 700;
 .al.Reforzar { background: var(--amber-soft); color: #5c3b00; }
 .al.Firme { background: var(--good-soft); color: #0d4b3b; }
 .al.Normal { background: #e4eeeb; color: #34504a; }
+.al.Sin { background: #fff; color: var(--muted); border: 1px dashed #b9b3a6; }
 
 .colchart { width: 100%; height: auto; display: block; }
 .colchart text { font: 11px var(--f-body); fill: var(--muted); }
@@ -202,9 +203,10 @@ tfoot td { border-top: 2px solid var(--ink); border-bottom: 0; font-weight: 700;
     Pausar: '<svg viewBox="0 0 12 12" aria-hidden="true"><rect x="2" y="1.5" width="3" height="9" fill="currentColor"/><rect x="7" y="1.5" width="3" height="9" fill="currentColor"/></svg>',
     Reforzar: '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 1 11 10H1z" fill="currentColor"/></svg>',
     Firme: '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 6.5 4.5 9.5 10.5 2.5" fill="none" stroke="currentColor" stroke-width="2"/></svg>',
-    Normal: '<svg viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.5" fill="currentColor"/></svg>'
+    Normal: '<svg viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.5" fill="currentColor"/></svg>',
+    Sin: '<svg viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>'
   };
-  var NOMBRE = { Pausar: "Pausar un pedido", Reforzar: "Reforzar viernes", Firme: "No puede faltar", Normal: "Normal" };
+  var NOMBRE = { Pausar: "Pausar un pedido", Reforzar: "Reforzar viernes", Firme: "No puede faltar", Normal: "Normal", Sin: "Sin ventas aún" };
   function badge(e) { return '<span class="al ' + e + '">' + ICON[e] + NOMBRE[e] + "</span>"; }
   function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
   function lista(a) { return a.length <= 1 ? (a[0] || "") : a.slice(0, -1).join(", ") + " y " + a[a.length - 1]; }
@@ -253,7 +255,7 @@ tfoot td { border-top: 2px solid var(--ink); border-bottom: 0; font-weight: 700;
     var C = X.CFG;
     $("t-prod").innerHTML = '<table><thead><tr><th>Producto</th><th>Canasta</th><th class="r">Unidades</th><th class="r">Por semana</th><th class="r">Ingreso</th><th class="r">Margen</th><th class="r">Margen %</th><th class="r">Días con venta</th><th class="r">Vie + sáb</th><th>Día pico</th><th>Qué hacer</th></tr></thead><tbody>' +
       A.prod.map(function (p) { return "<tr><td><b>" + esc(p.producto) + "</b></td><td>" + esc(p.categoria) + '</td><td class="r">' + p.uni + '</td><td class="r">' + (Math.round(p.semana * 10) / 10).toLocaleString("es-CO") + '</td><td class="r">' + money(p.ing) + '</td><td class="r">' + money(p.margen) + '</td><td class="r">' + Math.round(p.mgPct) + ' %</td><td class="r">' + Math.round(p.pctDias) + ' %</td><td class="r">' + Math.round(p.pctFinde) + ' %</td><td>' + esc(p.pico) + "</td><td>" + badge(p.estado) + "</td></tr>"; }).join("") + "</tbody></table>";
-    $("reglas").innerHTML = "Cómo se decide “qué hacer” (se cambia en config.js): <b>Pausar un pedido</b> si vende " + (C.QUIETO_MAX_SEMANA == null ? 4 : C.QUIETO_MAX_SEMANA) + " unidades por semana o menos. <b>Reforzar viernes</b> si al menos el " + (C.FIN_DE_SEMANA_PCT == null ? 37 : C.FIN_DE_SEMANA_PCT) + " % de sus unidades salen viernes y sábado (parejo sería 29 %). <b>No puede faltar</b> si se vendió al menos el " + (C.DIARIO_PCT == null ? 90 : C.DIARIO_PCT) + " % de los días y no pesa más el fin de semana. El resto es <b>Normal</b>.";
+    $("reglas").innerHTML = "Cómo se decide “qué hacer” (se cambia en config.js): <b>Pausar un pedido</b> si vende " + (C.QUIETO_MAX_SEMANA == null ? 4 : C.QUIETO_MAX_SEMANA) + " unidades por semana o menos. <b>Reforzar viernes</b> si al menos el " + (C.FIN_DE_SEMANA_PCT == null ? 37 : C.FIN_DE_SEMANA_PCT) + " % de sus unidades salen viernes y sábado (parejo sería 29 %). <b>No puede faltar</b> si se vendió al menos el " + (C.DIARIO_PCT == null ? 90 : C.DIARIO_PCT) + " % de los días y no pesa más el fin de semana. El resto es <b>Normal</b>. Un producto sin ventas en el periodo aparece como <b>Sin ventas aún</b> y no entra al pedido.";
     var mx = 1; A.prod.forEach(function (p) { p.dow.forEach(function (v) { if (v > mx) mx = v; }); });
     $("t-heat").innerHTML = '<table class="heat"><thead><tr><th>Producto</th>' + DIAS.map(function (d) { return "<th>" + d.slice(0, 3) + "</th>"; }).join("") + '</tr></thead><tbody>' +
       A.prod.map(function (p) { var m = Math.max(Math.max.apply(null, p.dow), 6); return "<tr><td>" + esc(p.producto) + "</td>" + p.dow.map(function (v, i) { var a = v / m; return '<td class="h" style="background:rgba(31,138,112,' + (0.06 + a * 0.72).toFixed(2) + ");color:" + (a > .55 ? "#fff" : "#163038") + '" title="' + esc(p.producto) + ", " + DIAS[i] + ": " + v + ' unidades">' + v + "</td>"; }).join("") + "</tr>"; }).join("") + "</tbody></table>";
@@ -264,20 +266,21 @@ tfoot td { border-top: 2px solid var(--ink); border-bottom: 0; font-weight: 700;
     if (!A.n) { $("t-pedido-t").innerHTML = ""; $("decisiones").innerHTML = ""; $("pedido-base").textContent = ""; pedidoRows = []; return; }
     var col = Math.max(0, Math.min(100, +$("colchon").value || 0)) / 100, mult = 1 + col;
     pedidoRows = A.prod.map(function (p) {
-      var pausar = p.estado === "Pausar", a = pausar ? 0 : Math.ceil(p.lunJue * mult), b = pausar ? 0 : Math.ceil(p.vieDom * mult);
-      return { p: p, a: a, b: b, tot: a + b };
+      var pausar = p.estado === "Pausar" || p.estado === "Sin ventas", a = pausar ? 0 : Math.ceil(p.lunJue * mult), b = pausar ? 0 : Math.ceil(p.vieDom * mult);
+      return { p: p, a: a, b: b, tot: a + b, pausa: pausar };
     });
     var semTxt = A.semanasN === 1 ? "1 semana" : (Math.round(A.semanasN * 10) / 10).toLocaleString("es-CO") + " semanas";
     var rep = Q.filter(function (c) { return c.titulo === "Semanas distintas entre sí" && c.nivel === "revisar"; })[0];
     $("pedido-base").innerHTML = "Base: promedio por semana de lo vendido entre el " + X.fmtDate(A.desde) + " y el " + X.fmtDate(A.hasta) + " (" + semTxt + ")." + (rep ? ' <b style="color:#8f5a00">Ojo: hay semanas repetidas en los datos; si es un error de copia, este pedido se apoya en una sola semana real.</b> <a href="#" data-go="calidad">Ver revisión</a>' : "");
     $("t-pedido-t").innerHTML = '<table><thead><tr><th>Producto</th><th>Qué hacer</th><th class="r">Lunes a jueves</th><th class="r">Viernes a domingo</th><th class="r">Total de la semana</th></tr></thead><tbody>' +
-      pedidoRows.map(function (r) { return "<tr><td><b>" + esc(r.p.producto) + "</b></td><td>" + badge(r.p.estado) + '</td><td class="r">' + (r.p.estado === "Pausar" ? "—" : r.a) + '</td><td class="r">' + (r.p.estado === "Pausar" ? "—" : r.b) + '</td><td class="r"><b>' + (r.p.estado === "Pausar" ? "0 · pausar" : r.tot) + "</b></td></tr>"; }).join("") + "</tbody></table>";
+      pedidoRows.map(function (r) { return "<tr><td><b>" + esc(r.p.producto) + "</b></td><td>" + badge(r.p.estado) + '</td><td class="r">' + (r.pausa ? "—" : r.a) + '</td><td class="r">' + (r.pausa ? "—" : r.b) + '</td><td class="r"><b>' + (r.pausa ? (r.p.estado === "Sin ventas" ? "0 · sin ventas" : "0 · pausar") : r.tot) + "</b></td></tr>"; }).join("") + "</tbody></table>";
 
-    var firmes = A.prod.filter(function (p) { return p.estado === "Firme"; }), ref = A.prod.filter(function (p) { return p.estado === "Reforzar"; }), pau = A.prod.filter(function (p) { return p.estado === "Pausar"; });
+    var sinV = A.prod.filter(function (p) { return p.estado === "Sin ventas"; }); var firmes = A.prod.filter(function (p) { return p.estado === "Firme"; }), ref = A.prod.filter(function (p) { return p.estado === "Reforzar"; }), pau = A.prod.filter(function (p) { return p.estado === "Pausar"; });
     var D = [];
     if (firmes.length) D.push("<b>" + cap(lista(firmes.map(function (p) { return p.producto; }))) + " se piden antes que cualquier promoción.</b> Se vendieron casi todos los días y su venta no depende del fin de semana: son el " + pc(sum(firmes, function (p) { return p.ing; }), A.ing) + " % del ingreso.");
     if (ref.length) { var ra = sum(ref, function (p) { return p.lunJue; }), rb = sum(ref, function (p) { return p.vieDom; }); D.push("<b>" + cap(lista(ref.map(function (p) { return p.producto; }))) + " se refuerzan el viernes, no el lunes.</b> En promedio salen " + Math.round(ra) + " unidades de lunes a jueves y " + Math.round(rb) + " de viernes a domingo: el pedido del viernes debe ser más alto que el del martes."); }
     if (pau.length) D.push("<b>" + cap(lista(pau.map(function (p) { return p.producto; }))) + " se pausan un pedido.</b> Salen " + lista(pau.map(function (p) { return esc(p.producto) + " " + (Math.round(p.semana * 10) / 10).toLocaleString("es-CO"); })) + " unidades por semana: no se reponen hasta ver otra semana igual.");
+    if (sinV.length) D.push("<b>" + cap(lista(sinV.map(function (p) { return p.producto; }))) + (sinV.length === 1 ? " no tiene" : " no tienen") + " ventas todavía.</b> No entran al pedido hasta que se registre al menos un día con ese producto.");
     D.push("<b>Con " + A.nDias + (A.nDias === 1 ? " día" : " días") + " no se promete el mes.</b> Se promete el pedido de la otra semana, y se vuelve a leer cuando haya más datos.");
     $("decisiones").innerHTML = D.map(function (t) { return "<li>" + t + "</li>"; }).join("");
   }
