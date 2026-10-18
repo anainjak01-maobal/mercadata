@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MercaData · Registrar el día</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="mercadata.css">
+<style>
+.hero { padding-block: 26px 8px; }
+.hero h1 { font-family: var(--f-display); font-weight: 800; font-size: clamp(28px, 5vw, 42px); line-height: 1.05; margin: 0 0 8px; letter-spacing: -.015em; color: var(--ink); }
+.hero p { margin: 0; color: var(--muted); max-width: 60ch; }
+.datebar { display: flex; gap: 14px; align-items: end; flex-wrap: wrap; margin-block: 18px 6px; }
+.datebar label.f { width: 190px; }
+.datebar .dn { font-family: var(--f-display); font-weight: 800; font-size: 22px; color: var(--ink); padding-bottom: 8px; }
+.notice { padding: 10px 14px; border-radius: 8px; font-size: 14.5px; background: var(--green-soft); color: #0d4b3b; margin-block: 10px; }
+.notice.warn { background: var(--warn-soft); color: #4d3200; }
+.grp { margin-top: 22px; }
+.grp h2 { font-family: var(--f-display); font-weight: 800; font-size: 19px; color: var(--ink); margin: 0 0 6px; padding-bottom: 6px; border-bottom: 2px solid var(--ink); display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.grp h2 small { font: 600 13px var(--f-body); color: var(--muted); }
+.row { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.row .n { font-weight: 600; font-size: 17px; }
+.row .n small { display: block; font-weight: 500; font-size: 13.5px; color: var(--muted); }
+.step { display: inline-grid; grid-template-columns: 48px 70px 48px; align-items: stretch; border: 2px solid var(--ink); border-radius: 10px; overflow: hidden; background: #fff; }
+.step button { appearance: none; border: 0; background: #e4eeeb; font-size: 26px; font-weight: 700; color: var(--ink); cursor: pointer; line-height: 1; min-height: 48px; }
+.step button:hover { background: #cfe3dd; }
+.step button:active { background: #b8d3ca; }
+.step input { border: 0; border-radius: 0; text-align: center; font: 700 20px var(--f-body); padding: 0; width: 100%; background: #fff; -moz-appearance: textfield; }
+.step input::-webkit-outer-spin-button, .step input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.row.on .step { border-color: var(--green); }
+.row.on .step input { color: var(--green); }
+.bar { position: fixed; left: 0; right: 0; bottom: 0; background: var(--ink); color: #fff; z-index: 20; padding-bottom: env(safe-area-inset-bottom); }
+.bar .wrap { display: flex; gap: 14px; align-items: center; justify-content: space-between; padding-block: 12px; flex-wrap: wrap; }
+.bar .sum b { font-family: var(--f-display); font-size: 22px; font-weight: 800; }
+.bar .sum small { display: block; color: #b9d4cd; font-size: 13px; }
+.bar .acts { display: flex; gap: 8px; }
+.bar .btn.ghost { color: #fff; border-color: #6c98a6; }
+.bar .btn.ghost:hover { background: #164e63; }
+.done { background: var(--good-soft); color: #0d4b3b; border-radius: 8px; padding: 14px 16px; margin-block: 14px; }
+.done b { font-family: var(--f-display); font-size: 19px; }
+dialog { border: 0; border-radius: 12px; padding: 0; max-width: min(440px, calc(100% - 32px)); box-shadow: 0 20px 60px rgba(0,0,0,.35); }
+dialog::backdrop { background: rgba(11,58,74,.55); }
+dialog .sheet { padding: 22px; display: grid; gap: 14px; }
+dialog h2 { margin: 0; font-family: var(--f-display); font-size: 22px; color: var(--ink); }
+dialog .acts { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+@media (max-width: 520px) { .bar .acts { width: 100%; } .bar .acts .btn { flex: 1; } .step { grid-template-columns: 44px 58px 44px; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="index.html"><span class="wordmark">Merca<i>Data</i></span><span class="slogan" id="negocio">El cuaderno del tendero, leído</span></a>
+    <nav class="nav" aria-label="Principal"><a href="index.html" aria-current="page">Registrar el día</a><a href="tablero.html">Tablero</a></nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <h1>¿Qué salió hoy?</h1>
+    <p>Anota cuántas unidades salieron de cada producto. Lo que no salió se deja en 0: no se escribe y no se rellena con promedios.</p>
+  </section>
+  <div id="avisos"></div>
+  <div class="datebar">
+    <label class="f">Día de las ventas<input type="date" id="fecha"></label>
+    <span class="dn" id="dn"></span>
+  </div>
+  <div id="aviso-dia" aria-live="polite"></div>
+  <div id="lista"></div>
+  <div id="resultado" aria-live="polite"></div>
+  <p class="foot">Los precios y costos salen de la hoja <b>Productos</b>. Si cambia un precio o llega un producto nuevo, se corrige allí.</p>
+</main>
+
+<div class="bar">
+  <div class="wrap">
+    <div class="sum"><b id="s-uni">0 unidades</b><small id="s-det">Ningún producto con ventas</small></div>
+    <div class="acts">
+      <button class="btn ghost" id="copiar" type="button">Copiar filas</button>
+      <button class="btn go" id="guardar" type="button">Guardar el día</button>
+    </div>
+  </div>
+</div>
+
+<dialog id="dlg" aria-labelledby="dlg-h">
+  <div class="sheet">
+    <h2 id="dlg-h">Ese día ya tiene ventas</h2>
+    <p id="dlg-p" style="margin:0"></p>
+    <div class="acts"><button class="btn ghost" id="dlg-no" type="button">No, revisar</button><button class="btn go" id="dlg-si" type="button">Sí, reemplazar</button></div>
+  </div>
+</dialog>
+<div class="toast" id="toast" hidden></div>
+
+<script src="config.js"></script>
+<script src="demo-data.js"></script>
+<script src="lib.js"></script>
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); }, X = window.MD, esc = X.esc, money = X.money;
+  var data, qty = {}; /* qty[producto] = unidades */
+
+  function toast(t) { var e = $("toast"); e.textContent = t; e.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(function () { e.hidden = true; }, 3200); }
+  $("negocio").textContent = X.CFG.NEGOCIO || "El cuaderno del tendero, leído";
+
+  function render() {
+    var cats = [], by = {};
+    data.prod.forEach(function (p) { if (!by[p.categoria]) { by[p.categoria] = []; cats.push(p.categoria); } by[p.categoria].push(p); });
+    $("lista").innerHTML = cats.map(function (c) {
+      var n = by[c].reduce(function (a, p) { return a + (qty[p.producto] || 0); }, 0);
+      return '<section class="grp"><h2>' + esc(c) + "<small>" + n + (n === 1 ? " unidad" : " unidades") + "</small></h2>" + by[c].map(function (p) {
+        var q = qty[p.producto] || 0, id = "q-" + X.norm(p.producto).replace(/[^a-z0-9]+/g, "-");
+        return '<div class="row' + (q ? " on" : "") + '"><div class="n">' + esc(p.producto) + "<small>" + money(p.precio) + " c/u</small></div>" +
+          '<div class="step"><button type="button" data-d="-1" data-p="' + esc(p.producto) + '" aria-label="Quitar una unidad de ' + esc(p.producto) + '">−</button>' +
+          '<input type="number" inputmode="numeric" min="0" max="500" id="' + id + '" value="' + q + '" data-p="' + esc(p.producto) + '" aria-label="Unidades de ' + esc(p.producto) + '">' +
+          '<button type="button" data-d="1" data-p="' + esc(p.producto) + '" aria-label="Agregar una unidad de ' + esc(p.producto) + '">+</button></div></div>';
+      }).join("") + "</section>";
+    }).join("");
+    resumen();
+  }
+  function lineas() { return data.prod.filter(function (p) { return (qty[p.producto] || 0) > 0; }).map(function (p) { return { producto: p.producto, categoria: p.categoria, unidades: qty[p.producto], precio: p.precio, costo: p.costo }; }); }
+  function resumen() {
+    var L = lineas(), u = X.sum(L, function (l) { return l.unidades; }), ing = X.sum(L, function (l) { return l.unidades * l.precio; }), mar = X.sum(L, function (l) { return l.unidades * (l.precio - l.costo); });
+    $("s-uni").textContent = u + (u === 1 ? " unidad" : " unidades");
+    $("s-det").textContent = L.length ? L.length + (L.length === 1 ? " producto" : " productos") + " · ingreso " + money(ing) + " · margen " + money(mar) : "Ningún producto con ventas";
+    $("guardar").disabled = !L.length; $("copiar").disabled = !L.length;
+  }
+  function setQ(p, v) {
+    v = Math.max(0, Math.min(500, Math.round(+v || 0))); qty[p] = v;
+    /* se actualiza solo la fila tocada para no perder el foco del teclado */
+    var inp = document.querySelector('input[data-p="' + (window.CSS && CSS.escape ? CSS.escape(p) : p) + '"]');
+    if (inp) { inp.value = v; inp.closest(".row").classList.toggle("on", v > 0); var g = inp.closest(".grp"), c = 0; g.querySelectorAll("input").forEach(function (i) { c += +i.value || 0; }); g.querySelector("h2 small").textContent = c + (c === 1 ? " unidad" : " unidades"); }
+    resumen();
+  }
+  $("lista").addEventListener("click", function (e) { var b = e.target.closest("button[data-d]"); if (!b) return; setQ(b.dataset.p, (qty[b.dataset.p] || 0) + +b.dataset.d); });
+  $("lista").addEventListener("input", function (e) { if (e.target.dataset.p) { var p = e.target.dataset.p, v = Math.max(0, Math.min(500, Math.round(+e.target.value || 0))); qty[p] = v; e.target.closest(".row").classList.toggle("on", v > 0); resumen(); } });
+  $("lista").addEventListener("change", function (e) { if (e.target.dataset.p) setQ(e.target.dataset.p, e.target.value); });
+  $("lista").addEventListener("focusin", function (e) { if (e.target.tagName === "INPUT") e.target.select(); });
+
+  /* al elegir un día que ya tiene ventas, se cargan para poder corregirlas */
+  function cargarDia() {
+    var f = $("fecha").value; $("dn").textContent = f ? X.dayName(f) : ""; $("resultado").innerHTML = "";
+    qty = {}; var ya = data.ven.filter(function (v) { return v.fecha === f; });
+    ya.forEach(function (v) { qty[v.producto] = (qty[v.producto] || 0) + v.unidades; });
+    $("aviso-dia").innerHTML = ya.length ? '<div class="notice warn" role="status"><b>El ' + X.fmtDate(f) + " ya tiene " + ya.length + " líneas registradas.</b> Se muestran abajo. Si corriges y guardas, reemplazan a las anteriores; no se duplican.</div>" : (f ? '<div class="notice" role="status">Día sin registro todavía. Anota lo que salió el ' + esc(X.dayName(f).toLowerCase()) + " " + X.fmtDate(f) + ".</div>" : "");
+    render();
+  }
+  $("fecha").addEventListener("change", cargarDia);
+
+  function payload(reemplazar) { return { fecha: $("fecha").value, reemplazar: !!reemplazar, registro: "Web", lineas: lineas().map(function (l) { return { producto: l.producto, unidades: l.unidades }; }) }; }
+  function aplicarLocal(f) { /* deja la copia local al día para que corregir el mismo día funcione sin esperar a Google */
+    data.ven = data.ven.filter(function (v) { return v.fecha !== f; });
+    lineas().forEach(function (l) { data.ven.push({ fecha: f, producto: l.producto, categoria: l.categoria, unidades: l.unidades, precio: l.precio, costoU: l.costo, ingreso: l.unidades * l.precio, costo: l.unidades * l.costo, margen: l.unidades * (l.precio - l.costo) }); });
+  }
+  function enviar(reemplazar) {
+    var b = $("guardar"); b.disabled = true; b.textContent = "Guardando…";
+    X.registrar(payload(reemplazar)).then(function (r) {
+      b.textContent = "Guardar el día"; resumen();
+      if (r.ok) {
+        var f = $("fecha").value; aplicarLocal(f);
+        $("resultado").innerHTML = '<div class="done" role="status"><b>Día guardado: ' + esc(X.dayName(f)) + " " + X.fmtDate(f) + "</b><br>" + r.lineas + " líneas · " + r.unidades + " unidades · ingreso " + money(r.ingreso) + (r.reemplazo ? ". Reemplazó las " + r.reemplazo + " líneas anteriores." : "") + ' El tablero lo muestra en unos minutos.</div>';
+        qty = {}; render(); $("aviso-dia").innerHTML = ""; window.scrollTo({ top: $("resultado").offsetTop - 80, behavior: "smooth" });
+      } else if (r.duplicado) {
+        $("dlg-p").textContent = "El " + X.fmtDate($("fecha").value) + " ya tiene " + r.filas + " líneas en la hoja. ¿Quieres reemplazarlas por lo que anotaste ahora? No se duplican.";
+        $("dlg").showModal();
+      } else if (r.sinConfig) {
+        toast("El guardado no está conectado todavía. Usa “Copiar filas” y pégalas en la hoja Ventas.");
+      } else {
+        $("resultado").innerHTML = '<div class="banner err" role="alert">' + esc(r.error || "No se pudo guardar.") + " Puedes usar “Copiar filas” y pegarlas a mano en la hoja Ventas.</div>";
+      }
+    });
+  }
+  $("guardar").addEventListener("click", function () { if (!$("fecha").value) { toast("Elige el día de las ventas."); return; } enviar(false); });
+  $("dlg-no").addEventListener("click", function () { $("dlg").close(); });
+  $("dlg-si").addEventListener("click", function () { $("dlg").close(); enviar(true); });
+
+  $("copiar").addEventListener("click", function () {
+    var f = $("fecha").value; if (!f) { toast("Elige el día de las ventas."); return; }
+    var t = lineas().map(function (l) { return [f, X.dayName(f), l.producto, l.categoria, l.unidades, l.precio, l.unidades * l.precio, l.costo, l.unidades * l.costo, l.unidades * (l.precio - l.costo)].join("\t"); }).join("\n");
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(function () { toast("Filas copiadas. Pégalas en la primera fila libre de la hoja Ventas."); }, function () { toast("No se pudo copiar."); });
+    else toast("No se pudo copiar.");
+  });
+
+  $("fecha").max = X.today(); $("fecha").value = X.today();
+  X.loadData().then(function (d) {
+    data = d;
+    var av = d.avisos.slice();
+    if (d.modo === "demo" && !av.length) av.push("Estás viendo datos de demostración. Conecta las hojas de Google en config.js para ver y guardar los datos reales.");
+    if (!X.CFG.REGISTRO) av.push("El guardado automático no está conectado (REGISTRO en config.js). Mientras tanto, usa “Copiar filas”.");
+    $("avisos").innerHTML = av.map(function (a) { return '<div class="banner' + (d.avisos.length ? " err" : "") + '" role="status">' + esc(a) + "</div>"; }).join("");
+    cargarDia();
+  });
+})();
+</script>
+</body>
+</html>

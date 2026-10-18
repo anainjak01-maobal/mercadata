@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MercaData · Tablero</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="mercadata.css">
+<style>
+.page-h { display: flex; justify-content: space-between; align-items: end; gap: 16px; flex-wrap: wrap; padding-block: 26px 12px; }
+.page-h h1 { font-family: var(--f-display); font-weight: 800; font-size: clamp(26px, 4vw, 38px); margin: 0; line-height: 1.05; color: var(--ink); letter-spacing: -.015em; }
+.page-h p { margin: 6px 0 0; color: var(--muted); font-size: 14.5px; }
+.tools { display: flex; gap: 10px; align-items: end; flex-wrap: wrap; }
+.tools label.f { font-size: 12.5px; }
+.tools input[type=date] { padding: 7px 10px; width: 150px; }
+.tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--line); margin-bottom: 22px; overflow-x: auto; scrollbar-width: none; }
+.tab { appearance: none; border: 0; background: transparent; padding: 11px 16px; font-weight: 700; font-size: 15px; color: var(--muted); border-bottom: 3px solid transparent; cursor: pointer; white-space: nowrap; margin-bottom: -1px; }
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--green); }
+.tab .n { display: inline-block; min-width: 20px; padding: 0 6px; margin-left: 6px; border-radius: 999px; background: var(--amber-soft); color: #5c3b00; font-size: 12px; text-align: center; }
+.panel > * + * { margin-top: 28px; }
+
+.ledger { display: grid; grid-template-columns: repeat(5, 1fr); background: var(--ink); color: #fff; border-radius: 10px; overflow: hidden; }
+.ledger > div { padding: 18px 20px; border-left: 1px solid #2c5868; min-width: 0; }
+.ledger > div:first-child { border-left: 0; }
+.ledger small { display: block; color: #b9d4cd; font-size: 13px; }
+.ledger b { display: block; font-family: var(--f-display); font-weight: 800; font-size: clamp(22px, 3vw, 31px); color: #fff; font-variant-numeric: tabular-nums; line-height: 1.15; margin-block: 4px; }
+.ledger span { font-size: 12.5px; color: #8fd5be; }
+
+.cols2 { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; }
+h2.s { font-family: var(--f-display); font-weight: 800; font-size: 21px; margin: 0 0 12px; color: var(--ink); }
+.sub { font-size: 13.5px; color: var(--muted); margin: -6px 0 12px; max-width: 75ch; }
+
+.bars { display: grid; gap: 10px; }
+.br { display: grid; grid-template-columns: minmax(84px, 130px) 1fr auto; gap: 10px; align-items: center; font-size: 14.5px; }
+.br .t { height: 16px; background: #dfe9e5; border-radius: 0 4px 4px 0; position: relative; }
+.br .f { height: 100%; background: var(--green); border-radius: 0 4px 4px 0; min-width: 2px; }
+.br .f.amber { background: #e3a21a; }
+.br b { font-variant-numeric: tabular-nums; font-weight: 700; min-width: 64px; text-align: right; }
+.br span.l { overflow-wrap: anywhere; }
+.br span.l small { display: block; color: var(--muted); font-size: 12px; }
+
+.read { margin: 0; padding: 0; list-style: none; display: grid; gap: 12px; }
+.read li { padding-left: 16px; border-left: 4px solid var(--green); font-size: 15.5px; max-width: 80ch; }
+.read li b { font-weight: 700; }
+
+table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+th { text-align: left; font-size: 13px; color: var(--muted); font-weight: 700; padding: 8px 10px; border-bottom: 2px solid var(--ink); white-space: nowrap; }
+td { padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+td.r, th.r { text-align: right; font-variant-numeric: tabular-nums; }
+tfoot td { border-top: 2px solid var(--ink); border-bottom: 0; font-weight: 700; }
+.scroll { overflow-x: auto; }
+.rule { font-size: 13.5px; color: var(--muted); max-width: 85ch; }
+
+.al { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: 13px; padding: 2px 10px 2px 8px; border-radius: 999px; white-space: nowrap; }
+.al svg { width: 12px; height: 12px; flex: none; }
+.al.Pausar { background: var(--bad-soft); color: #8e1b14; }
+.al.Reforzar { background: var(--amber-soft); color: #5c3b00; }
+.al.Firme { background: var(--good-soft); color: #0d4b3b; }
+.al.Normal { background: #e4eeeb; color: #34504a; }
+
+.colchart { width: 100%; height: auto; display: block; }
+.colchart text { font: 11px var(--f-body); fill: var(--muted); }
+.colchart rect.bar { fill: var(--green); }
+.colchart rect.bar.fin { fill: #e3a21a; }
+.colchart rect.bar:hover { fill: var(--ink); }
+
+.heat td.h { text-align: center; font-variant-numeric: tabular-nums; font-weight: 600; min-width: 46px; }
+.heat th { text-align: center; }
+.heat th:first-child, .heat td:first-child { text-align: left; }
+
+.chk { display: grid; gap: 10px; }
+.chk > div { display: grid; grid-template-columns: auto 1fr; gap: 12px; padding: 12px 14px; border-radius: 8px; background: #fff; border: 1px solid var(--line); }
+.chk > div.revisar { background: var(--warn-soft); border-color: #e6cf8c; }
+.chk b { display: block; font-size: 15.5px; }
+.chk p { margin: 2px 0 0; font-size: 14.5px; max-width: 85ch; }
+.chk .ic { width: 22px; height: 22px; margin-top: 2px; }
+.pill { display: inline-block; font-size: 12.5px; font-weight: 700; padding: 1px 9px; border-radius: 999px; margin-left: 8px; vertical-align: 1px; }
+.pill.ok { background: var(--good-soft); color: #0d4b3b; } .pill.revisar { background: #f3d58a; color: #4d3200; }
+
+.alertbar { background: var(--warn-soft); border: 1px solid #e6cf8c; color: #4d3200; padding: 10px 14px; border-radius: 8px; font-size: 14.5px; display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-bottom: 20px; }
+.ctrl { display: flex; gap: 14px; align-items: end; flex-wrap: wrap; }
+.ctrl label.f { width: 180px; }
+.paste { font: 13px/1.5 ui-monospace, Menlo, Consolas, monospace; background: #fff; border: 1px dashed #9fb8b0; border-radius: 8px; padding: 12px; white-space: pre-wrap; }
+@media (max-width: 860px) {
+  .ledger { grid-template-columns: repeat(2, 1fr); }
+  .ledger > div { border-left: 0; border-top: 1px solid #2c5868; }
+  .ledger > div:nth-child(-n+2) { border-top: 0; }
+  .ledger > div:nth-child(even) { border-left: 1px solid #2c5868; }
+  .ledger > div:last-child { grid-column: 1 / -1; border-left: 0; }
+  .cols2 { grid-template-columns: 1fr; gap: 28px; }
+}
+.cols2 > *, .panel > * { min-width: 0; }
+@media (max-width: 560px) {
+  .colchart text { font-size: 17px; }
+  .br { grid-template-columns: 96px 1fr auto; gap: 8px; font-size: 14px; }
+  .br b { min-width: 0; font-size: 13.5px; }
+  .ledger > div { padding: 14px 14px; }
+  .scroll table { font-size: 13px; }
+  .xs-hide { display: none; }
+  .scroll th, .scroll td { padding: 7px 6px; }
+  .br b { font-size: 13px; }
+  .br { gap: 6px; }
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="index.html"><span class="wordmark">Merca<i>Data</i></span><span class="slogan" id="negocio">El cuaderno del tendero, leído</span></a>
+    <nav class="nav" aria-label="Principal"><a href="index.html">Registrar el día</a><a href="tablero.html" aria-current="page">Tablero</a></nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="page-h">
+    <div><h1>Tablero de ventas</h1><p id="periodo">Cargando datos…</p></div>
+    <div class="tools">
+      <label class="f">Desde<input type="date" id="desde"></label>
+      <label class="f">Hasta<input type="date" id="hasta"></label>
+      <button class="btn ghost sm" id="limpiar" type="button">Todo el periodo</button>
+      <button class="btn sm" id="recargar" type="button">Actualizar datos</button>
+    </div>
+  </div>
+  <div id="avisos"></div>
+  <div id="alertbar"></div>
+
+  <div class="tabs" role="tablist" aria-label="Secciones del tablero">
+    <button class="tab" role="tab" id="t-resumen" aria-controls="p-resumen" aria-selected="true" data-tab="resumen">Resumen</button>
+    <button class="tab" role="tab" id="t-productos" aria-controls="p-productos" aria-selected="false" data-tab="productos">Productos</button>
+    <button class="tab" role="tab" id="t-pedido" aria-controls="p-pedido" aria-selected="false" data-tab="pedido">Pedido de la semana</button>
+    <button class="tab" role="tab" id="t-calidad" aria-controls="p-calidad" aria-selected="false" data-tab="calidad">Calidad de los datos<span class="n" id="n-calidad" hidden></span></button>
+  </div>
+
+  <section class="panel" id="p-resumen" role="tabpanel" aria-labelledby="t-resumen">
+    <div class="ledger" id="ledger"></div>
+    <div><h2 class="s">Lectura del periodo</h2><ul class="read" id="lectura"></ul></div>
+    <div class="cols2">
+      <div><h2 class="s">Cuatro canastas, no doce productos</h2><div class="bars" id="b-cat"></div></div>
+      <div><h2 class="s">Ingreso y margen por canasta</h2><div class="scroll" id="t-cat"></div></div>
+    </div>
+    <div class="cols2">
+      <div><h2 class="s">El sábado no es un martes</h2><p class="sub">Ingreso promedio de cada día de la semana. Ámbar: viernes y sábado.</p><div class="bars" id="b-dow"></div></div>
+      <div><h2 class="s">Ingreso día por día</h2><p class="sub" id="dia-sub"></p><div id="c-dia"></div></div>
+    </div>
+    <div><h2 class="s">Semana contra semana</h2><div class="scroll" id="t-sem"></div></div>
+  </section>
+
+  <section class="panel" id="p-productos" role="tabpanel" aria-labelledby="t-productos" hidden>
+    <div><h2 class="s">Lo que rota y lo que se queda quieto</h2><div class="scroll" id="t-prod"></div>
+      <p class="rule" id="reglas"></p></div>
+    <div><h2 class="s">Qué se vende cada día</h2><p class="sub">Unidades vendidas por producto y día de la semana en el periodo. Cuanto más oscuro, más sale ese día.</p><div class="scroll" id="t-heat"></div></div>
+  </section>
+
+  <section class="panel" id="p-pedido" role="tabpanel" aria-labelledby="t-pedido" hidden>
+    <div><h2 class="s">Cuatro decisiones de pedido</h2><ul class="read" id="decisiones"></ul></div>
+    <div>
+      <h2 class="s">Cuánto pedir la próxima semana</h2>
+      <p class="sub" id="pedido-base"></p>
+      <div class="ctrl"><label class="f">Colchón de seguridad (%)<input type="number" id="colchon" min="0" max="100" value="0" inputmode="numeric"></label><button class="btn go sm" id="copiar-pedido" type="button">Copiar pedido</button></div>
+      <div class="scroll" id="t-pedido-t" style="margin-top:14px"></div>
+    </div>
+    <p class="rule">El pedido es el promedio semanal de lo que salió, repartido entre lunes a jueves y viernes a domingo. No descuenta lo que ya hay en el estante: el cuaderno no registra el inventario. Con pocas semanas de datos no se promete “así va a ser noviembre”, solo el pedido de la otra semana.</p>
+  </section>
+
+  <section class="panel" id="p-calidad" role="tabpanel" aria-labelledby="t-calidad" hidden>
+    <div><h2 class="s">¿Se puede confiar en estos números?</h2><p class="sub">Revisiones automáticas sobre toda la hoja de Ventas, sin importar las fechas elegidas arriba.</p><div class="chk" id="chk"></div></div>
+    <div><h2 class="s">Reglas de limpieza del cuaderno</h2><div class="scroll" id="t-reglas"></div></div>
+  </section>
+
+  <p class="foot" id="foot"></p>
+</main>
+<div class="toast" id="toast" hidden></div>
+
+<script src="config.js"></script>
+<script src="demo-data.js"></script>
+<script src="lib.js"></script>
+<script src="analisis.js"></script>
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); }, X = window.MD, esc = X.esc, money = X.money, sum = X.sum, DIAS = X.ORDEN_DIAS;
+  var data, loadedAt, A, Q;
+  $("negocio").textContent = X.CFG.NEGOCIO || "El cuaderno del tendero, leído";
+
+  function toast(t) { var e = $("toast"); e.textContent = t; e.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(function () { e.hidden = true; }, 3000); }
+  var TABS = ["resumen", "productos", "pedido", "calidad"];
+  function showTab(n) { TABS.forEach(function (t) { $("p-" + t).hidden = t !== n; $("t-" + t).setAttribute("aria-selected", t === n ? "true" : "false"); }); try { history.replaceState(null, "", "#" + n); } catch (e) {} }
+  document.querySelector(".tabs").addEventListener("click", function (e) { var b = e.target.closest("[data-tab]"); if (b) showTab(b.dataset.tab); });
+  document.querySelector(".tabs").addEventListener("keydown", function (e) {
+    if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+    var cur = TABS.indexOf((document.querySelector('.tab[aria-selected="true"]') || {}).dataset.tab), n = TABS[(cur + (e.key === "ArrowRight" ? 1 : TABS.length - 1)) % TABS.length];
+    showTab(n); $("t-" + n).focus();
+  });
+  document.addEventListener("click", function (e) { var g = e.target.closest("[data-go]"); if (g) { e.preventDefault(); showTab(g.dataset.go); window.scrollTo({ top: 0, behavior: "smooth" }); } });
+
+  function bars(items, o) {
+    o = o || {}; var max = Math.max.apply(null, items.map(function (i) { return i.v; }).concat([1]));
+    return items.map(function (i) { return '<div class="br"><span class="l">' + esc(i.l) + (i.sub ? "<small>" + esc(i.sub) + "</small>" : "") + '</span><div class="t"><div class="f' + (i.amber ? " amber" : "") + '" style="width:' + Math.max(1.5, i.v * 100 / max) + '%"></div></div><b>' + (o.money ? money(i.v) : i.v) + "</b></div>"; }).join("");
+  }
+  var ICON = {
+    Pausar: '<svg viewBox="0 0 12 12" aria-hidden="true"><rect x="2" y="1.5" width="3" height="9" fill="currentColor"/><rect x="7" y="1.5" width="3" height="9" fill="currentColor"/></svg>',
+    Reforzar: '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 1 11 10H1z" fill="currentColor"/></svg>',
+    Firme: '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 6.5 4.5 9.5 10.5 2.5" fill="none" stroke="currentColor" stroke-width="2"/></svg>',
+    Normal: '<svg viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.5" fill="currentColor"/></svg>'
+  };
+  var NOMBRE = { Pausar: "Pausar un pedido", Reforzar: "Reforzar viernes", Firme: "No puede faltar", Normal: "Normal" };
+  function badge(e) { return '<span class="al ' + e + '">' + ICON[e] + NOMBRE[e] + "</span>"; }
+  function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+  function lista(a) { return a.length <= 1 ? (a[0] || "") : a.slice(0, -1).join(", ") + " y " + a[a.length - 1]; }
+  function pc(a, b) { return b ? Math.round(a * 100 / b) : 0; }
+
+  function renderResumen() {
+    var mgp = A.ing ? (Math.round(A.margen * 1000 / A.ing) / 10).toLocaleString("es-CO") : "0";
+    $("ledger").innerHTML = [
+      ["Ingresó", money(A.ing), "por " + A.uni + " unidades"], ["Costo de lo vendido", money(A.costo), "según la factura"],
+      ["Margen", money(A.margen), mgp + " % del ingreso"], ["Líneas de venta", A.n, "producto × día con movimiento"],
+      ["Días con registro", A.nDias + (A.diasRango && A.diasRango !== A.nDias ? " de " + A.diasRango : ""), A.nDias ? X.fmtDate(A.desde) + " al " + X.fmtDate(A.hasta) : "—"]
+    ].map(function (x) { return "<div><small>" + x[0] + "</small><b>" + x[1] + "</b><span>" + x[2] + "</span></div>"; }).join("");
+
+    var L = [], cats = Object.keys(A.cat).sort(function (a, b) { return A.cat[b].ing - A.cat[a].ing; });
+    if (!A.n) { $("lectura").innerHTML = "<li>No hay ventas en este periodo. Cambia las fechas o registra un día.</li>"; ["b-cat", "t-cat", "b-dow", "c-dia", "t-sem"].forEach(function (id) { $(id).innerHTML = ""; }); return; }
+    L.push("En <b>" + A.nDias + (A.nDias === 1 ? " día" : " días") + "</b> el cuaderno sumó <b>" + money(A.ing) + "</b>. El margen, antes de arriendo, servicios y el trabajo del dueño, fue <b>" + money(A.margen) + "</b> (" + mgp + " %). Ese margen no es ganancia: es lo que queda para pagar todo lo demás.");
+    var top = cats[0]; L.push("<b>" + esc(top) + "</b> es la canasta que más ingresó: " + money(A.cat[top].ing) + ", el " + pc(A.cat[top].ing, A.ing) + " % del total.");
+    var gap = cats.map(function (c) { return { c: c, d: pc(A.cat[c].margen, A.margen) - pc(A.cat[c].ing, A.ing) }; }).sort(function (a, b) { return b.d - a.d; })[0];
+    if (gap && gap.d >= 5) L.push("<b>" + esc(gap.c) + "</b> es el " + pc(A.cat[gap.c].ing, A.ing) + " % del ingreso pero deja el " + pc(A.cat[gap.c].margen, A.margen) + " % del margen: es la canasta que más rinde por cada peso vendido.");
+    var dw = DIAS.filter(function (d) { return Object.keys(A.dow[d].fechas).length; }).map(function (d) { var n = Object.keys(A.dow[d].fechas).length; return { d: d, avg: A.dow[d].ing / n }; }).sort(function (a, b) { return b.avg - a.avg; });
+    if (dw.length > 1) L.push("El <b>" + dw[0].d.toLowerCase() + "</b> es el día más fuerte (" + money(dw[0].avg) + " en promedio) y el <b>" + dw[dw.length - 1].d.toLowerCase() + "</b> el más flojo (" + money(dw[dw.length - 1].avg) + ").");
+    var pau = A.prod.filter(function (p) { return p.estado === "Pausar"; });
+    if (pau.length) L.push("<b>" + pau.length + (pau.length === 1 ? " producto" : " productos") + " casi no rota" + (pau.length === 1 ? "" : "n") + "</b> (" + lista(pau.map(function (p) { return esc(p.producto); })) + "): juntos son el " + pc(sum(pau, function (p) { return p.ing; }), A.ing) + " % del ingreso. Ocupan plata y estante.");
+    $("lectura").innerHTML = L.map(function (t) { return "<li>" + t + "</li>"; }).join("");
+
+    $("b-cat").innerHTML = bars(cats.map(function (c, i) { return { l: c, sub: pc(A.cat[c].ing, A.ing) + " % del ingreso", v: A.cat[c].ing }; }), { money: true });
+    $("t-cat").innerHTML = '<table><thead><tr><th>Canasta</th><th class="r xs-hide">Unidades</th><th class="r">Ingreso</th><th class="r">% ingreso</th><th class="r">Margen</th><th class="r xs-hide">% margen</th></tr></thead><tbody>' +
+      cats.map(function (c) { var o = A.cat[c]; return "<tr><td><b>" + esc(c) + '</b></td><td class="r xs-hide">' + o.uni + '</td><td class="r">' + money(o.ing) + '</td><td class="r">' + pc(o.ing, A.ing) + ' %</td><td class="r">' + money(o.margen) + '</td><td class="r xs-hide">' + pc(o.margen, A.margen) + " %</td></tr>"; }).join("") +
+      '</tbody><tfoot><tr><td>Total</td><td class="r">' + A.uni + '</td><td class="r">' + money(A.ing) + '</td><td class="r">100 %</td><td class="r">' + money(A.margen) + '</td><td class="r">100 %</td></tr></tfoot></table>';
+
+    $("b-dow").innerHTML = bars(DIAS.filter(function (d) { return Object.keys(A.dow[d].fechas).length; }).map(function (d) { var n = Object.keys(A.dow[d].fechas).length; return { l: d, sub: n + (n === 1 ? " día" : " días"), v: Math.round(A.dow[d].ing / n), amber: d === "Viernes" || d === "Sábado" }; }), { money: true });
+
+    var keys = A.fechas, mx = Math.max.apply(null, keys.map(function (k) { return A.dia[k]; })), W = 600, H = 190, pb = 22, bw = (W - 10) / keys.length;
+    $("dia-sub").textContent = "Cada columna es un día. Pasa el cursor para ver el valor.";
+    $("c-dia").innerHTML = '<svg class="colchart" viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Ingreso por día">' +
+      '<line x1="0" x2="' + W + '" y1="' + (H - pb) + '" y2="' + (H - pb) + '" stroke="#b7cbc5"/>' +
+      keys.map(function (k, i) { var h = Math.round(A.dia[k] * (H - pb - 16) / mx), dn = X.dayName(k), fin = dn === "Viernes" || dn === "Sábado"; return '<rect class="bar' + (fin ? " fin" : "") + '" x="' + (5 + i * bw + bw * .12) + '" y="' + (H - pb - h) + '" width="' + (bw * .76) + '" height="' + h + '" rx="2"><title>' + dn + " " + X.fmtDate(k) + ": " + money(A.dia[k]) + '</title></rect><text x="' + (5 + i * bw + bw / 2) + '" y="' + (H - 6) + '" text-anchor="middle">' + dn.charAt(0) + "</text>"; }).join("") + "</svg>";
+
+    var prev = null;
+    $("t-sem").innerHTML = '<table><thead><tr><th>Semana</th><th class="r">Días</th><th class="r xs-hide">Unidades</th><th class="r">Ingreso</th><th class="r xs-hide">Margen</th><th class="r">Cambio</th></tr></thead><tbody>' +
+      A.semKeys.map(function (k) { var s = A.sem[k], nd = Object.keys(s.dias).length, ch = prev == null ? "—" : (prev === s.ing ? "igual al peso" : (s.ing > prev ? "+" : "−") + Math.abs(Math.round((s.ing - prev) * 100 / prev)) + " %"); prev = s.ing; return "<tr><td>Del " + X.fmtDate(k) + " al " + X.fmtDate(X.addDays(k, 6)) + '</td><td class="r">' + nd + '</td><td class="r xs-hide">' + s.uni + '</td><td class="r">' + money(s.ing) + '</td><td class="r xs-hide">' + money(s.margen) + '</td><td class="r">' + ch + "</td></tr>"; }).join("") + "</tbody></table>";
+  }
+
+  function renderProductos() {
+    if (!A.n) { $("t-prod").innerHTML = ""; $("t-heat").innerHTML = ""; $("reglas").textContent = ""; return; }
+    var C = X.CFG;
+    $("t-prod").innerHTML = '<table><thead><tr><th>Producto</th><th>Canasta</th><th class="r">Unidades</th><th class="r">Por semana</th><th class="r">Ingreso</th><th class="r">Margen</th><th class="r">Margen %</th><th class="r">Días con venta</th><th class="r">Vie + sáb</th><th>Día pico</th><th>Qué hacer</th></tr></thead><tbody>' +
+      A.prod.map(function (p) { return "<tr><td><b>" + esc(p.producto) + "</b></td><td>" + esc(p.categoria) + '</td><td class="r">' + p.uni + '</td><td class="r">' + (Math.round(p.semana * 10) / 10).toLocaleString("es-CO") + '</td><td class="r">' + money(p.ing) + '</td><td class="r">' + money(p.margen) + '</td><td class="r">' + Math.round(p.mgPct) + ' %</td><td class="r">' + Math.round(p.pctDias) + ' %</td><td class="r">' + Math.round(p.pctFinde) + ' %</td><td>' + esc(p.pico) + "</td><td>" + badge(p.estado) + "</td></tr>"; }).join("") + "</tbody></table>";
+    $("reglas").innerHTML = "Cómo se decide “qué hacer” (se cambia en config.js): <b>Pausar un pedido</b> si vende " + (C.QUIETO_MAX_SEMANA == null ? 4 : C.QUIETO_MAX_SEMANA) + " unidades por semana o menos. <b>Reforzar viernes</b> si al menos el " + (C.FIN_DE_SEMANA_PCT == null ? 37 : C.FIN_DE_SEMANA_PCT) + " % de sus unidades salen viernes y sábado (parejo sería 29 %). <b>No puede faltar</b> si se vendió al menos el " + (C.DIARIO_PCT == null ? 90 : C.DIARIO_PCT) + " % de los días y no pesa más el fin de semana. El resto es <b>Normal</b>.";
+    var mx = 1; A.prod.forEach(function (p) { p.dow.forEach(function (v) { if (v > mx) mx = v; }); });
+    $("t-heat").innerHTML = '<table class="heat"><thead><tr><th>Producto</th>' + DIAS.map(function (d) { return "<th>" + d.slice(0, 3) + "</th>"; }).join("") + '</tr></thead><tbody>' +
+      A.prod.map(function (p) { var m = Math.max(Math.max.apply(null, p.dow), 6); return "<tr><td>" + esc(p.producto) + "</td>" + p.dow.map(function (v, i) { var a = v / m; return '<td class="h" style="background:rgba(31,138,112,' + (0.06 + a * 0.72).toFixed(2) + ");color:" + (a > .55 ? "#fff" : "#163038") + '" title="' + esc(p.producto) + ", " + DIAS[i] + ": " + v + ' unidades">' + v + "</td>"; }).join("") + "</tr>"; }).join("") + "</tbody></table>";
+  }
+
+  var pedidoRows = [];
+  function renderPedido() {
+    if (!A.n) { $("t-pedido-t").innerHTML = ""; $("decisiones").innerHTML = ""; $("pedido-base").textContent = ""; pedidoRows = []; return; }
+    var col = Math.max(0, Math.min(100, +$("colchon").value || 0)) / 100, mult = 1 + col;
+    pedidoRows = A.prod.map(function (p) {
+      var pausar = p.estado === "Pausar", a = pausar ? 0 : Math.ceil(p.lunJue * mult), b = pausar ? 0 : Math.ceil(p.vieDom * mult);
+      return { p: p, a: a, b: b, tot: a + b };
+    });
+    var semTxt = A.semanasN === 1 ? "1 semana" : (Math.round(A.semanasN * 10) / 10).toLocaleString("es-CO") + " semanas";
+    var rep = Q.filter(function (c) { return c.titulo === "Semanas distintas entre sí" && c.nivel === "revisar"; })[0];
+    $("pedido-base").innerHTML = "Base: promedio por semana de lo vendido entre el " + X.fmtDate(A.desde) + " y el " + X.fmtDate(A.hasta) + " (" + semTxt + ")." + (rep ? ' <b style="color:#8f5a00">Ojo: hay semanas repetidas en los datos; si es un error de copia, este pedido se apoya en una sola semana real.</b> <a href="#" data-go="calidad">Ver revisión</a>' : "");
+    $("t-pedido-t").innerHTML = '<table><thead><tr><th>Producto</th><th>Qué hacer</th><th class="r">Lunes a jueves</th><th class="r">Viernes a domingo</th><th class="r">Total de la semana</th></tr></thead><tbody>' +
+      pedidoRows.map(function (r) { return "<tr><td><b>" + esc(r.p.producto) + "</b></td><td>" + badge(r.p.estado) + '</td><td class="r">' + (r.p.estado === "Pausar" ? "—" : r.a) + '</td><td class="r">' + (r.p.estado === "Pausar" ? "—" : r.b) + '</td><td class="r"><b>' + (r.p.estado === "Pausar" ? "0 · pausar" : r.tot) + "</b></td></tr>"; }).join("") + "</tbody></table>";
+
+    var firmes = A.prod.filter(function (p) { return p.estado === "Firme"; }), ref = A.prod.filter(function (p) { return p.estado === "Reforzar"; }), pau = A.prod.filter(function (p) { return p.estado === "Pausar"; });
+    var D = [];
+    if (firmes.length) D.push("<b>" + cap(lista(firmes.map(function (p) { return p.producto; }))) + " se piden antes que cualquier promoción.</b> Se vendieron casi todos los días y su venta no depende del fin de semana: son el " + pc(sum(firmes, function (p) { return p.ing; }), A.ing) + " % del ingreso.");
+    if (ref.length) { var ra = sum(ref, function (p) { return p.lunJue; }), rb = sum(ref, function (p) { return p.vieDom; }); D.push("<b>" + cap(lista(ref.map(function (p) { return p.producto; }))) + " se refuerzan el viernes, no el lunes.</b> En promedio salen " + Math.round(ra) + " unidades de lunes a jueves y " + Math.round(rb) + " de viernes a domingo: el pedido del viernes debe ser más alto que el del martes."); }
+    if (pau.length) D.push("<b>" + cap(lista(pau.map(function (p) { return p.producto; }))) + " se pausan un pedido.</b> Salen " + lista(pau.map(function (p) { return esc(p.producto) + " " + (Math.round(p.semana * 10) / 10).toLocaleString("es-CO"); })) + " unidades por semana: no se reponen hasta ver otra semana igual.");
+    D.push("<b>Con " + A.nDias + (A.nDias === 1 ? " día" : " días") + " no se promete el mes.</b> Se promete el pedido de la otra semana, y se vuelve a leer cuando haya más datos.");
+    $("decisiones").innerHTML = D.map(function (t) { return "<li>" + t + "</li>"; }).join("");
+  }
+  $("colchon").addEventListener("input", function () { if (A) renderPedido(); });
+  $("copiar-pedido").addEventListener("click", function () {
+    if (!pedidoRows.length) return;
+    var t = "Pedido sugerido · semana siguiente (" + (X.CFG.NEGOCIO || "") + ")\n" + pedidoRows.filter(function (r) { return r.p.estado !== "Pausar"; }).map(function (r) { return "- " + r.p.producto + ": " + r.tot + " (lun-jue " + r.a + " · vie-dom " + r.b + ")"; }).join("\n") +
+      "\nPausar este pedido: " + pedidoRows.filter(function (r) { return r.p.estado === "Pausar"; }).map(function (r) { return r.p.producto; }).join(", ");
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(function () { toast("Pedido copiado."); }, function () { toast("No se pudo copiar."); }); else toast("No se pudo copiar.");
+  });
+
+  function renderCalidad() {
+    var ic = { ok: '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#146b52"/><path d="M6.5 12.5 10.5 16.5 17.5 8" fill="none" stroke="#fff" stroke-width="2.4"/></svg>',
+      revisar: '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.5 23 21H1z" fill="#c98a0b"/><path d="M12 9v6" stroke="#fff" stroke-width="2.6"/><circle cx="12" cy="18" r="1.5" fill="#fff"/></svg>' };
+    var pend = Q.filter(function (c) { return c.nivel === "revisar"; }).length;
+    $("n-calidad").hidden = !pend; $("n-calidad").textContent = pend;
+    $("chk").innerHTML = Q.map(function (c) { return '<div class="' + c.nivel + '">' + ic[c.nivel] + "<div><b>" + esc(c.titulo) + '<span class="pill ' + c.nivel + '">' + (c.nivel === "ok" ? "Bien" : "Revisar") + "</span></b><p>" + esc(c.detalle) + "</p></div></div>"; }).join("");
+    $("alertbar").innerHTML = pend ? '<div class="alertbar" role="status"><span><b>' + pend + (pend === 1 ? " revisión pendiente" : " revisiones pendientes") + " en los datos.</b> " + esc(Q.filter(function (c) { return c.nivel === "revisar"; })[0].titulo) + (pend > 1 ? " y " + (pend - 1) + " más." : ".") + '</span><button class="btn sm" type="button" data-go="calidad">Ver qué pasa</button></div>' : "";
+    $("t-reglas").innerHTML = '<table><thead><tr><th>Error del cuaderno</th><th>Regla</th><th>Dónde se aplica</th></tr></thead><tbody>' + [
+      ["Mismo producto con tres nombres", "Lista cerrada de productos", "Registro: solo se eligen productos de la hoja Productos. Tablero: revisa los que están fuera."],
+      ["Un sábado copiado dos veces", "Una fecha, una fila por producto", "Registro: guardar un día ya registrado lo reemplaza. Tablero: busca repetidas."],
+      ["Precio escrito como texto (14.500 / 14500)", "Precio en número pelado", "Se toma de la hoja Productos, no se escribe a mano."],
+      ["Día sin página", "Día vacío se deja vacío y se dice", "Tablero: lista los días sin registro; no se rellenan con promedios."],
+      ["Costo igual al precio", "El costo sale de la factura", "Tablero: avisa si el costo es cero o no es menor que el precio."],
+      ["Producto “por si acaso”", "Lo que no está en el cuaderno no existe", "Registro: si no salió, queda en 0 y no se guarda fila."]
+    ].map(function (r) { return "<tr><td>" + r.map(esc).join("</td><td>") + "</td></tr>"; }).join("") + "</tbody></table>";
+  }
+
+  function filtered() { return MDA.analizar(data.ven, data.prod, { desde: $("desde").value, hasta: $("hasta").value }); }
+  function renderAll() {
+    A = filtered(); Q = MDA.calidad(data.ven, data.prod);
+    $("periodo").textContent = A.n ? "Ventas del " + X.fmtDate(A.desde) + " al " + X.fmtDate(A.hasta) + " · " + A.n + " líneas" : "Sin ventas en este periodo";
+    renderResumen(); renderProductos(); renderPedido(); renderCalidad();
+    $("foot").textContent = (data.modo === "demo" ? "Datos de demostración. " : "Datos de la hoja de Google. ") + "Actualizado a las " + loadedAt + ". Los cambios en la hoja pueden tardar unos minutos en verse.";
+  }
+  function load() {
+    $("periodo").textContent = "Cargando datos…";
+    return X.loadData().then(function (d) {
+      data = d; loadedAt = new Date().toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" }).replace(/\.$/, "");
+      var av = d.avisos.slice(); if (d.modo === "demo" && !av.length) av.push("Estás viendo datos de demostración. Conecta las hojas de Google en config.js para ver los datos reales.");
+      $("avisos").innerHTML = av.map(function (a) { return '<div class="banner' + (d.avisos.length ? " err" : "") + '" role="status">' + esc(a) + "</div>"; }).join("");
+      var f = d.ven.map(function (v) { return v.fecha; }).filter(Boolean).sort(); if (f.length) { $("desde").min = $("hasta").min = f[0]; $("desde").max = $("hasta").max = f[f.length - 1]; }
+      renderAll();
+    });
+  }
+  ["desde", "hasta"].forEach(function (id) { $(id).addEventListener("change", function () { if (data) renderAll(); }); });
+  $("limpiar").addEventListener("click", function () { $("desde").value = ""; $("hasta").value = ""; if (data) renderAll(); });
+  $("recargar").addEventListener("click", function () { load().then(function () { toast("Datos actualizados."); }); });
+  var h = (location.hash || "").replace("#", ""); if (TABS.indexOf(h) >= 0) showTab(h);
+  load();
+})();
+</script>
+</body>
+</html>
