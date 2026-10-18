@@ -4,54 +4,71 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MercaData · Registrar el día</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b3a4a'/%3E%3Cpath d='M7 22V10l9 8 9-8v12' fill='none' stroke='%237fd1b8' stroke-width='3' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="mercadata.css?v=3">
+<script>try{var _t=localStorage.getItem("md-tema");if(_t)document.documentElement.setAttribute("data-theme",_t)}catch(e){}</script>
+<link rel="stylesheet" href="mercadata.css?v=4">
 <style>
 .hero { padding-block: 26px 8px; }
 .hero h1 { font-family: var(--f-display); font-weight: 800; font-size: clamp(28px, 5vw, 42px); line-height: 1.05; margin: 0 0 8px; letter-spacing: -.015em; color: var(--ink); }
 .hero p { margin: 0; color: var(--muted); max-width: 60ch; }
+.hoy { margin-top: 18px; }
+.hoy-card { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 0; background: var(--head); color: #fff; border-radius: 12px; overflow: hidden; }
+.hoy-card > div { padding: 14px 16px; border-left: 1px solid #2c5868; min-width: 0; }
+.hoy-card > div:first-child { border-left: 0; }
+.hoy-card small { display: block; color: #b9d4cd; font-size: 12.5px; }
+.hoy-card b { display: block; font-family: var(--f-display); font-weight: 800; font-size: 19px; line-height: 1.2; margin-top: 3px; }
 .datebar { display: flex; gap: 14px; align-items: end; flex-wrap: wrap; margin-block: 18px 6px; }
 .datebar label.f { width: 190px; }
 .datebar .dn { font-family: var(--f-display); font-weight: 800; font-size: 22px; color: var(--ink); padding-bottom: 8px; }
-.notice { padding: 10px 14px; border-radius: 8px; font-size: 14.5px; background: var(--green-soft); color: #0d4b3b; margin-block: 10px; }
-.notice.warn { background: var(--warn-soft); color: #4d3200; }
+.datebar .btn { margin-bottom: 2px; }
+.notice { padding: 10px 14px; border-radius: 8px; font-size: 14.5px; background: var(--green-soft); color: var(--good); margin-block: 10px; animation: rise .35s ease both; }
+.notice.warn { background: var(--warn-soft); color: var(--warn); }
+.filtro { margin: 14px 0 0; }
 .grp { margin-top: 22px; }
 .grp h2 { font-family: var(--f-display); font-weight: 800; font-size: 19px; color: var(--ink); margin: 0 0 6px; padding-bottom: 6px; border-bottom: 2px solid var(--ink); display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
 .grp h2 small { font: 600 13px var(--f-body); color: var(--muted); }
 .row { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); }
 .row .n { font-weight: 600; font-size: 17px; }
 .row .n small { display: block; font-weight: 500; font-size: 13.5px; color: var(--muted); }
-.step { display: inline-grid; grid-template-columns: 48px 70px 48px; align-items: stretch; border: 2px solid var(--ink); border-radius: 10px; overflow: hidden; background: #fff; }
-.step button { appearance: none; border: 0; background: #e4eeeb; font-size: 26px; font-weight: 700; color: var(--ink); cursor: pointer; line-height: 1; min-height: 48px; }
-.step button:hover { background: #cfe3dd; }
-.step button:active { background: #b8d3ca; }
-.step input { border: 0; border-radius: 0; text-align: center; font: 700 20px var(--f-body); padding: 0; width: 100%; background: #fff; -moz-appearance: textfield; }
+.step { display: inline-grid; grid-template-columns: 48px 70px 48px; align-items: stretch; border: 2px solid var(--btn); border-radius: 10px; overflow: hidden; background: var(--card); }
+.step button { appearance: none; border: 0; background: var(--soft); font-size: 26px; font-weight: 700; color: var(--ink); cursor: pointer; line-height: 1; min-height: 48px; }
+.step button:hover { background: var(--track); }
+.step button:active { filter: brightness(.95); }
+.step input { border: 0; border-radius: 0; text-align: center; font: 700 20px var(--f-body); padding: 0; width: 100%; background: var(--card); color: var(--ink); -moz-appearance: textfield; }
 .step input::-webkit-outer-spin-button, .step input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-.row.on .step { border-color: var(--green); }
+.row.on .step { border-color: var(--go); }
 .row.on .step input { color: var(--green); }
-.bar { position: fixed; left: 0; right: 0; bottom: 0; background: var(--ink); color: #fff; z-index: 20; padding-bottom: env(safe-area-inset-bottom); }
+.bar { position: fixed; left: 0; right: 0; bottom: 0; background: var(--head); color: #fff; z-index: 20; padding-bottom: env(safe-area-inset-bottom); }
 .bar .wrap { display: flex; gap: 14px; align-items: center; justify-content: space-between; padding-block: 12px; flex-wrap: wrap; }
 .bar .sum b { font-family: var(--f-display); font-size: 22px; font-weight: 800; }
 .bar .sum small { display: block; color: #b9d4cd; font-size: 13px; }
 .bar .acts { display: flex; gap: 8px; }
-.bar .btn.ghost { color: #fff; border-color: #6c98a6; }
+.bar .btn.ghost { color: #fff; border-color: #6c98a6; background: transparent; }
 .bar .btn.ghost:hover { background: #164e63; }
-.done { background: var(--good-soft); color: #0d4b3b; border-radius: 8px; padding: 14px 16px; margin-block: 14px; }
+.done { background: var(--good-soft); color: var(--good); border-radius: 8px; padding: 14px 16px; margin-block: 14px; animation: rise .4s ease both; }
 .done b { font-family: var(--f-display); font-size: 19px; }
-dialog { border: 0; border-radius: 12px; padding: 0; max-width: min(440px, calc(100% - 32px)); box-shadow: 0 20px 60px rgba(0,0,0,.35); }
-dialog::backdrop { background: rgba(11,58,74,.55); }
+dialog { border: 0; border-radius: 12px; padding: 0; max-width: min(440px, calc(100% - 32px)); background: var(--card); color: var(--ink-2); box-shadow: 0 20px 60px rgba(0,0,0,.35); }
+dialog::backdrop { background: rgba(6,34,43,.6); }
 dialog .sheet { padding: 22px; display: grid; gap: 14px; }
 dialog h2 { margin: 0; font-family: var(--f-display); font-size: 22px; color: var(--ink); }
 dialog .acts { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
-@media (max-width: 520px) { .bar .acts { width: 100%; } .bar .acts .btn { flex: 1; } .step { grid-template-columns: 44px 58px 44px; } }
+@media (max-width: 520px) {
+  .bar .acts { width: 100%; }
+  .bar .acts .btn { flex: 1; }
+  .step { grid-template-columns: 44px 58px 44px; }
+  .hoy-card { grid-template-columns: 1fr 1fr; }
+  .hoy-card > div:first-child { grid-column: 1 / -1; border-left: 0; border-bottom: 1px solid #2c5868; }
+  .hoy-card > div:nth-child(3) { border-left: 0; }
+}
 </style>
 </head>
 <body>
 <header class="top">
   <div class="wrap">
     <a class="brand" href="index.html"><span class="wordmark">Merca<i>Data</i></span><span class="slogan" id="negocio">El cuaderno del tendero, leído</span></a>
-    <nav class="nav" aria-label="Principal"><a href="index.html" aria-current="page">Registrar el día</a><a href="tablero.html">Tablero</a></nav>
+    <nav class="nav" aria-label="Principal"><a href="index.html" aria-current="page">Registrar el día</a><a href="tablero.html">Tablero</a><button class="theme-btn" id="tema" type="button" aria-label="Cambiar el tema">Tema: automático</button></nav>
   </div>
 </header>
 
@@ -61,11 +78,14 @@ dialog .acts { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wr
     <p>Anota cuántas unidades salieron de cada producto. Lo que no salió se deja en 0: no se escribe y no se rellena con promedios.</p>
   </section>
   <div id="avisos"></div>
+  <div class="hoy" id="hoy" aria-live="polite"></div>
   <div class="datebar">
     <label class="f">Día de las ventas<input type="date" id="fecha"></label>
     <span class="dn" id="dn"></span>
+    <button class="btn ghost sm" id="repetir" type="button">Repetir el último día</button>
   </div>
   <div id="aviso-dia" aria-live="polite"></div>
+  <div class="filtro"><div class="chips" id="cats" role="group" aria-label="Filtrar por canasta"></div></div>
   <div id="lista"></div>
   <div id="resultado" aria-live="polite"></div>
   <p class="foot">Los precios y costos salen de la hoja <b>Productos</b>. Si cambia un precio o llega un producto nuevo, se corrige allí.</p>
@@ -90,22 +110,43 @@ dialog .acts { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wr
 </dialog>
 <div class="toast" id="toast" hidden></div>
 
-<script src="config.js?v=3"></script>
-<script src="demo-data.js?v=3"></script>
-<script src="lib.js?v=3"></script>
+<script src="config.js?v=4"></script>
+<script src="demo-data.js?v=4"></script>
+<script src="lib.js?v=4"></script>
+<script>
+(function () {
+  "use strict";
+  var TEMAS = { auto: "Tema: automático", light: "Tema: claro", dark: "Tema: oscuro" };
+  function temaActual() { return document.documentElement.getAttribute("data-theme") || "auto"; }
+  function pintaTema() { document.getElementById("tema").textContent = TEMAS[temaActual()]; }
+  document.getElementById("tema").addEventListener("click", function () {
+    var sig = { auto: "light", light: "dark", dark: "auto" }[temaActual()] || "auto";
+    if (sig === "auto") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", sig);
+    try { if (sig === "auto") localStorage.removeItem("md-tema"); else localStorage.setItem("md-tema", sig); } catch (e) {}
+    pintaTema();
+  });
+  pintaTema();
+})();
+</script>
 <script>
 (function () {
   "use strict";
   var $ = function (id) { return document.getElementById(id); }, X = window.MD, esc = X.esc, money = X.money;
-  var data, qty = {}; /* qty[producto] = unidades */
+  var data, qty = {}, cat = "";
 
   function toast(t) { var e = $("toast"); e.textContent = t; e.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(function () { e.hidden = true; }, 3200); }
   $("negocio").textContent = X.CFG.NEGOCIO || "El cuaderno del tendero, leído";
 
+  function categorias() { var out = []; data.prod.forEach(function (p) { if (out.indexOf(p.categoria) < 0) out.push(p.categoria); }); return out; }
+  function renderChips() {
+    $("cats").innerHTML = [""].concat(categorias()).map(function (c) { return '<button type="button" data-c="' + esc(c) + '" aria-pressed="' + (cat === c ? "true" : "false") + '">' + (c || "Todas") + "</button>"; }).join("");
+  }
+  $("cats").addEventListener("click", function (e) { var b = e.target.closest("button[data-c]"); if (!b) return; cat = b.dataset.c; renderChips(); render(); });
+
   function render() {
     var cats = [], by = {};
     data.prod.forEach(function (p) { if (!by[p.categoria]) { by[p.categoria] = []; cats.push(p.categoria); } by[p.categoria].push(p); });
-    $("lista").innerHTML = cats.map(function (c) {
+    $("lista").innerHTML = cats.filter(function (c) { return !cat || c === cat; }).map(function (c) {
       var n = by[c].reduce(function (a, p) { return a + (qty[p.producto] || 0); }, 0);
       return '<section class="grp"><h2>' + esc(c) + "<small>" + n + (n === 1 ? " unidad" : " unidades") + "</small></h2>" + by[c].map(function (p) {
         var q = qty[p.producto] || 0, id = "q-" + X.norm(p.producto).replace(/[^a-z0-9]+/g, "-");
@@ -126,8 +167,7 @@ dialog .acts { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wr
   }
   function setQ(p, v) {
     v = Math.max(0, Math.min(500, Math.round(+v || 0))); qty[p] = v;
-    /* se actualiza solo la fila tocada para no perder el foco del teclado */
-    var inp = document.querySelector('input[data-p="' + (window.CSS && CSS.escape ? CSS.escape(p) : p) + '"]');
+    var inp = null; document.querySelectorAll("input[data-p]").forEach(function (i) { if (i.dataset.p === p) inp = i; });
     if (inp) { inp.value = v; inp.closest(".row").classList.toggle("on", v > 0); var g = inp.closest(".grp"), c = 0; g.querySelectorAll("input").forEach(function (i) { c += +i.value || 0; }); g.querySelector("h2 small").textContent = c + (c === 1 ? " unidad" : " unidades"); }
     resumen();
   }
@@ -136,18 +176,35 @@ dialog .acts { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wr
   $("lista").addEventListener("change", function (e) { if (e.target.dataset.p) setQ(e.target.dataset.p, e.target.value); });
   $("lista").addEventListener("focusin", function (e) { if (e.target.tagName === "INPUT") e.target.select(); });
 
-  /* al elegir un día que ya tiene ventas, se cargan para poder corregirlas */
+  function renderHoy() {
+    var hoy = X.today(), ven = data.ven, hoyL = ven.filter(function (v) { return v.fecha === hoy; });
+    var last = ven.map(function (v) { return v.fecha; }).filter(function (f) { return f && f < hoy; }).sort().pop();
+    var u = X.sum(hoyL, function (v) { return v.unidades; }), faltan = 0;
+    for (var i = 0; i < 7; i++) { var d = X.addDays(hoy, -i); if (!ven.some(function (v) { return v.fecha === d; })) faltan++; }
+    $("hoy").innerHTML = '<div class="hoy-card"><div><small>Hoy · ' + esc(X.dayName(hoy)) + " " + X.fmtDate(hoy) + "</small><b>" + (hoyL.length ? hoyL.length + (hoyL.length === 1 ? " producto" : " productos") + " · " + u + " unidades" : "Sin registro todavía") + "</b></div>" +
+      "<div><small>Último día anterior</small><b>" + (last ? X.fmtDate(last) : "—") + "</b></div>" +
+      "<div><small>Días sin registro (7)</small><b>" + faltan + "</b></div></div>";
+  }
+
   function cargarDia() {
     var f = $("fecha").value; $("dn").textContent = f ? X.dayName(f) : ""; $("resultado").innerHTML = "";
     qty = {}; var ya = data.ven.filter(function (v) { return v.fecha === f; });
     ya.forEach(function (v) { qty[v.producto] = (qty[v.producto] || 0) + v.unidades; });
     $("aviso-dia").innerHTML = ya.length ? '<div class="notice warn" role="status"><b>El ' + X.fmtDate(f) + " ya tiene " + ya.length + " líneas registradas.</b> Se muestran abajo. Si corriges y guardas, reemplazan a las anteriores; no se duplican.</div>" : (f ? '<div class="notice" role="status">Día sin registro todavía. Anota lo que salió el ' + esc(X.dayName(f).toLowerCase()) + " " + X.fmtDate(f) + ".</div>" : "");
-    render();
+    render(); renderHoy();
   }
   $("fecha").addEventListener("change", cargarDia);
 
+  $("repetir").addEventListener("click", function () {
+    var f = $("fecha").value, prev = data.ven.map(function (v) { return v.fecha; }).filter(function (x) { return x && x !== f; }).sort().pop();
+    if (!prev) { toast("No hay un día anterior para repetir."); return; }
+    qty = {}; data.ven.filter(function (v) { return v.fecha === prev; }).forEach(function (v) { qty[v.producto] = (qty[v.producto] || 0) + v.unidades; });
+    $("resultado").innerHTML = ""; $("aviso-dia").innerHTML = '<div class="notice" role="status">Copiado el ' + esc(X.dayName(prev)) + " " + X.fmtDate(prev) + ". Ajusta lo que haya cambiado y guarda.</div>";
+    render(); toast("Unidades copiadas. Ajusta lo que haya cambiado.");
+  });
+
   function payload(reemplazar) { return { fecha: $("fecha").value, reemplazar: !!reemplazar, registro: "Web", lineas: lineas().map(function (l) { return { producto: l.producto, unidades: l.unidades }; }) }; }
-  function aplicarLocal(f) { /* deja la copia local al día para que corregir el mismo día funcione sin esperar a Google */
+  function aplicarLocal(f) {
     data.ven = data.ven.filter(function (v) { return v.fecha !== f; });
     lineas().forEach(function (l) { data.ven.push({ fecha: f, producto: l.producto, categoria: l.categoria, unidades: l.unidades, precio: l.precio, costoU: l.costo, ingreso: l.unidades * l.precio, costo: l.unidades * l.costo, margen: l.unidades * (l.precio - l.costo) }); });
   }
@@ -158,7 +215,7 @@ dialog .acts { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wr
       if (r.ok) {
         var f = $("fecha").value; aplicarLocal(f);
         $("resultado").innerHTML = '<div class="done" role="status"><b>Día guardado: ' + esc(X.dayName(f)) + " " + X.fmtDate(f) + "</b><br>" + r.lineas + " líneas · " + r.unidades + " unidades · ingreso " + money(r.ingreso) + (r.reemplazo ? ". Reemplazó las " + r.reemplazo + " líneas anteriores." : "") + ' El tablero lo muestra en unos minutos.</div>';
-        qty = {}; render(); $("aviso-dia").innerHTML = ""; window.scrollTo({ top: $("resultado").offsetTop - 80, behavior: "smooth" });
+        qty = {}; render(); renderHoy(); $("aviso-dia").innerHTML = ""; window.scrollTo({ top: $("resultado").offsetTop - 80, behavior: "smooth" });
       } else if (r.duplicado) {
         $("dlg-p").textContent = "El " + X.fmtDate($("fecha").value) + " ya tiene " + r.filas + " líneas en la hoja. ¿Quieres reemplazarlas por lo que anotaste ahora? No se duplican.";
         $("dlg").showModal();
@@ -182,7 +239,7 @@ dialog .acts { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wr
 
   $("fecha").max = X.today(); $("fecha").value = X.today();
   X.loadData().then(function (d) {
-    data = d;
+    data = d; renderChips();
     var av = d.avisos.slice();
     if (d.modo === "demo" && !av.length) av.push("Estás viendo datos de demostración. Conecta las hojas de Google en config.js para ver y guardar los datos reales.");
     if (!X.CFG.REGISTRO) av.push("El guardado automático no está conectado (REGISTRO en config.js). Mientras tanto, usa “Copiar filas”.");

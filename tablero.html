@@ -4,9 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MercaData · Tablero</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b3a4a'/%3E%3Cpath d='M7 22V10l9 8 9-8v12' fill='none' stroke='%237fd1b8' stroke-width='3' stroke-linejoin='round'/%3E%3C/svg%3E">
+<script>try{var _t=localStorage.getItem("md-tema");if(_t)document.documentElement.setAttribute("data-theme",_t)}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="mercadata.css?v=3">
+<link rel="stylesheet" href="mercadata.css?v=4">
 <style>
 .page-h { display: flex; justify-content: space-between; align-items: end; gap: 16px; flex-wrap: wrap; padding-block: 26px 12px; }
 .page-h h1 { font-family: var(--f-display); font-weight: 800; font-size: clamp(26px, 4vw, 38px); margin: 0; line-height: 1.05; color: var(--ink); letter-spacing: -.015em; }
@@ -15,12 +17,13 @@
 .tools label.f { font-size: 12.5px; }
 .tools input[type=date] { padding: 7px 10px; width: 150px; }
 .tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--line); margin-bottom: 22px; overflow-x: auto; scrollbar-width: none; }
-.tab { appearance: none; border: 0; background: transparent; padding: 11px 16px; font-weight: 700; font-size: 15px; color: var(--muted); border-bottom: 3px solid transparent; cursor: pointer; white-space: nowrap; margin-bottom: -1px; }
+.tab { appearance: none; border: 0; background: transparent; padding: 11px 16px; font-weight: 700; font-size: 15px; color: var(--muted); border-bottom: 3px solid transparent; cursor: pointer; white-space: nowrap; margin-bottom: -1px; transition: color .2s ease, border-color .2s ease; }
+.tab:hover { color: var(--ink); }
 .tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--green); }
-.tab .n { display: inline-block; min-width: 20px; padding: 0 6px; margin-left: 6px; border-radius: 999px; background: var(--amber-soft); color: #5c3b00; font-size: 12px; text-align: center; }
+.tab .n { display: inline-block; min-width: 20px; padding: 0 6px; margin-left: 6px; border-radius: 999px; background: var(--amber-soft); color: var(--warn); font-size: 12px; text-align: center; }
 .panel > * + * { margin-top: 28px; }
 
-.ledger { display: grid; grid-template-columns: repeat(5, 1fr); background: var(--ink); color: #fff; border-radius: 10px; overflow: hidden; }
+.ledger { display: grid; grid-template-columns: repeat(5, 1fr); background: var(--head); color: #fff; border-radius: 12px; overflow: hidden; }
 .ledger > div { padding: 18px 20px; border-left: 1px solid #2c5868; min-width: 0; }
 .ledger > div:first-child { border-left: 0; }
 .ledger small { display: block; color: #b9d4cd; font-size: 13px; }
@@ -33,56 +36,88 @@ h2.s { font-family: var(--f-display); font-weight: 800; font-size: 21px; margin:
 
 .bars { display: grid; gap: 10px; }
 .br { display: grid; grid-template-columns: minmax(84px, 130px) 1fr auto; gap: 10px; align-items: center; font-size: 14.5px; }
-.br .t { height: 16px; background: #dfe9e5; border-radius: 0 4px 4px 0; position: relative; }
-.br .f { height: 100%; background: var(--green); border-radius: 0 4px 4px 0; min-width: 2px; }
-.br .f.amber { background: #e3a21a; }
+.br .t { height: 16px; background: var(--track); border-radius: 0 4px 4px 0; position: relative; }
+.br .f { height: 100%; background: var(--green); border-radius: 0 4px 4px 0; min-width: 2px; transition: width .5s ease; }
+.br .f.amber { background: var(--amber); }
 .br b { font-variant-numeric: tabular-nums; font-weight: 700; min-width: 64px; text-align: right; }
 .br span.l { overflow-wrap: anywhere; }
 .br span.l small { display: block; color: var(--muted); font-size: 12px; }
 
 .read { margin: 0; padding: 0; list-style: none; display: grid; gap: 12px; }
 .read li { padding-left: 16px; border-left: 4px solid var(--green); font-size: 15.5px; max-width: 80ch; }
-.read li b { font-weight: 700; }
+.read li b { font-weight: 700; color: var(--ink); }
 
 table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
 th { text-align: left; font-size: 13px; color: var(--muted); font-weight: 700; padding: 8px 10px; border-bottom: 2px solid var(--ink); white-space: nowrap; }
 td { padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
 td.r, th.r { text-align: right; font-variant-numeric: tabular-nums; }
 tfoot td { border-top: 2px solid var(--ink); border-bottom: 0; font-weight: 700; }
+tr.falta td { background: var(--warn-soft); color: var(--warn); }
 .scroll { overflow-x: auto; }
 .rule { font-size: 13.5px; color: var(--muted); max-width: 85ch; }
+.up { color: var(--good); font-weight: 700; } .down { color: var(--bad); font-weight: 700; }
 
 .al { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: 13px; padding: 2px 10px 2px 8px; border-radius: 999px; white-space: nowrap; }
 .al svg { width: 12px; height: 12px; flex: none; }
-.al.Pausar { background: var(--bad-soft); color: #8e1b14; }
-.al.Reforzar { background: var(--amber-soft); color: #5c3b00; }
-.al.Firme { background: var(--good-soft); color: #0d4b3b; }
-.al.Normal { background: #e4eeeb; color: #34504a; }
-.al.Sin { background: #fff; color: var(--muted); border: 1px dashed #b9b3a6; }
+.al.Pausar { background: var(--bad-soft); color: var(--bad); }
+.al.Reforzar { background: var(--amber-soft); color: var(--warn); }
+.al.Firme { background: var(--good-soft); color: var(--good); }
+.al.Normal { background: var(--soft); color: var(--ink-2); }
+.al.Sin { background: var(--card); color: var(--muted); border: 1px dashed var(--line); }
 
-.colchart { width: 100%; height: auto; display: block; }
+.colchart { width: 100%; height: auto; display: block; overflow: visible; }
 .colchart text { font: 11px var(--f-body); fill: var(--muted); }
-.colchart rect.bar { fill: var(--green); }
-.colchart rect.bar.fin { fill: #e3a21a; }
+.colchart rect.bar { fill: var(--green); transition: fill .15s ease; }
+.colchart rect.bar.fin { fill: var(--amber); }
+.colchart rect.bar.parc { opacity: .4; }
 .colchart rect.bar:hover { fill: var(--ink); }
+.colchart .trend { fill: none; stroke: var(--ink); stroke-width: 2.2; stroke-dasharray: 7 6; stroke-linecap: round; }
+.colchart .trend-dot { fill: var(--paper); stroke: var(--ink); stroke-width: 2; }
 
 .heat td.h { text-align: center; font-variant-numeric: tabular-nums; font-weight: 600; min-width: 46px; }
 .heat th { text-align: center; }
 .heat th:first-child, .heat td:first-child { text-align: left; }
 
 .chk { display: grid; gap: 10px; }
-.chk > div { display: grid; grid-template-columns: auto 1fr; gap: 12px; padding: 12px 14px; border-radius: 8px; background: #fff; border: 1px solid var(--line); }
-.chk > div.revisar { background: var(--warn-soft); border-color: #e6cf8c; }
-.chk b { display: block; font-size: 15.5px; }
+.chk > div { display: grid; grid-template-columns: auto 1fr; gap: 12px; padding: 12px 14px; border-radius: 10px; background: var(--card); border: 1px solid var(--line); }
+.chk > div.revisar { background: var(--warn-soft); border-color: var(--amber); }
+.chk b { display: block; font-size: 15.5px; color: var(--ink); }
 .chk p { margin: 2px 0 0; font-size: 14.5px; max-width: 85ch; }
 .chk .ic { width: 22px; height: 22px; margin-top: 2px; }
 .pill { display: inline-block; font-size: 12.5px; font-weight: 700; padding: 1px 9px; border-radius: 999px; margin-left: 8px; vertical-align: 1px; }
-.pill.ok { background: var(--good-soft); color: #0d4b3b; } .pill.revisar { background: #f3d58a; color: #4d3200; }
+.pill.ok { background: var(--good-soft); color: var(--good); } .pill.revisar { background: var(--amber-soft); color: var(--warn); }
 
-.alertbar { background: var(--warn-soft); border: 1px solid #e6cf8c; color: #4d3200; padding: 10px 14px; border-radius: 8px; font-size: 14.5px; display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-bottom: 20px; }
+.alertbar { background: var(--warn-soft); border: 1px solid var(--amber); color: var(--warn); padding: 10px 14px; border-radius: 10px; font-size: 14.5px; display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-bottom: 20px; animation: rise .35s ease both; }
+.alertbar b { color: var(--ink); }
 .ctrl { display: flex; gap: 14px; align-items: end; flex-wrap: wrap; }
 .ctrl label.f { width: 180px; }
-.paste { font: 13px/1.5 ui-monospace, Menlo, Consolas, monospace; background: #fff; border: 1px dashed #9fb8b0; border-radius: 8px; padding: 12px; white-space: pre-wrap; }
+.acciones { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.pares { display: flex; gap: 14px; flex-wrap: wrap; align-items: end; }
+.pares label.f { width: 210px; }
+.hist > summary { cursor: pointer; font-family: var(--f-display); font-weight: 800; font-size: 19px; color: var(--ink); padding: 6px 0; }
+.hist[open] > summary { margin-bottom: 10px; }
+.hist-sub { margin: 0 0 6px; font-size: 13.5px; color: var(--muted); }
+
+.present { position: fixed; inset: 0; z-index: 60; background: var(--head); color: #e6f2ee; overflow-y: auto; padding: clamp(22px, 4vw, 56px); animation: rise .35s ease both; }
+.present .in { max-width: 1040px; margin: 0 auto; }
+.present h2 { font-family: var(--f-display); font-weight: 800; font-size: clamp(30px, 4.6vw, 56px); line-height: 1.05; color: #fff; margin: 0 0 6px; letter-spacing: -.015em; }
+.present .sub2 { color: #9db8b1; font-size: clamp(16px, 2vw, 22px); margin: 0 0 clamp(22px, 4vw, 40px); }
+.present ul.pl { list-style: none; margin: 0; padding: 0; display: grid; gap: clamp(14px, 2.4vw, 26px); font-size: clamp(18px, 2.3vw, 27px); line-height: 1.4; }
+.present ul.pl li { padding-left: 18px; border-left: 5px solid #4fc2a0; max-width: 62ch; }
+.present ul.pl li b { color: #fff; }
+.present .pt-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; margin-top: clamp(24px, 4vw, 44px); }
+.present .pt-grid div { background: rgba(255,255,255,.07); border-radius: 10px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: baseline; gap: 10px; font-size: clamp(16px, 1.8vw, 20px); }
+.present .pt-grid b { font-family: var(--f-display); font-size: clamp(24px, 2.8vw, 34px); color: #fff; }
+.present .pt-off { margin-top: 22px; color: #9db8b1; font-size: clamp(15px, 1.7vw, 19px); }
+.present .x { position: fixed; top: 14px; right: 14px; }
+.present .x.btn.ghost { color: #fff; border-color: #6c98a6; background: transparent; }
+.present .x.btn.ghost:hover { background: #164e63; }
+
+#imprimir { display: none; }
+.talla { font-size: 14.5px; }
+
+.foot { padding-block: 28px 90px; color: var(--muted); font-size: 13px; }
+
 @media (max-width: 860px) {
   .ledger { grid-template-columns: repeat(2, 1fr); }
   .ledger > div { border-left: 0; border-top: 1px solid #2c5868; }
@@ -95,13 +130,25 @@ tfoot td { border-top: 2px solid var(--ink); border-bottom: 0; font-weight: 700;
 @media (max-width: 560px) {
   .colchart text { font-size: 17px; }
   .br { grid-template-columns: 96px 1fr auto; gap: 8px; font-size: 14px; }
-  .br b { min-width: 0; font-size: 13.5px; }
+  .br b { min-width: 0; font-size: 13px; }
   .ledger > div { padding: 14px 14px; }
   .scroll table { font-size: 13px; }
   .xs-hide { display: none; }
   .scroll th, .scroll td { padding: 7px 6px; }
-  .br b { font-size: 13px; }
   .br { gap: 6px; }
+  .tab { padding: 11px 12px; }
+  .pares label.f { width: 100%; }
+  .ctrl label.f { width: 100%; }
+}
+@media print {
+  body > *:not(#imprimir) { display: none !important; }
+  #imprimir { display: block !important; color: #000; background: #fff; font: 14px/1.4 var(--f-body, Arial), sans-serif; }
+  #imprimir h1 { font-size: 22px; margin: 0 0 4px; }
+  #imprimir table { font-size: 13px; }
+  #imprimir th, #imprimir td { border-bottom: 1px solid #999; padding: 6px 8px; color: #000; }
+  #imprimir .caja { width: 26px; font-size: 18px; text-align: center; }
+  #imprimir .real { width: 110px; border-bottom: 1px solid #000; }
+  @page { margin: 14mm; }
 }
 </style>
 </head>
@@ -109,7 +156,7 @@ tfoot td { border-top: 2px solid var(--ink); border-bottom: 0; font-weight: 700;
 <header class="top">
   <div class="wrap">
     <a class="brand" href="index.html"><span class="wordmark">Merca<i>Data</i></span><span class="slogan" id="negocio">El cuaderno del tendero, leído</span></a>
-    <nav class="nav" aria-label="Principal"><a href="index.html">Registrar el día</a><a href="tablero.html" aria-current="page">Tablero</a></nav>
+    <nav class="nav" aria-label="Principal"><a href="index.html">Registrar el día</a><a href="tablero.html" aria-current="page">Tablero</a><button class="theme-btn" id="tema" type="button" aria-label="Cambiar el tema">Tema: automático</button></nav>
   </div>
 </header>
 
@@ -136,6 +183,7 @@ tfoot td { border-top: 2px solid var(--ink); border-bottom: 0; font-weight: 700;
   <section class="panel" id="p-resumen" role="tabpanel" aria-labelledby="t-resumen">
     <div class="ledger" id="ledger"></div>
     <div><h2 class="s">Lectura del periodo</h2><ul class="read" id="lectura"></ul></div>
+    <div><h2 class="s">Ventas por semana, con tendencia</h2><p class="sub" id="sem-sub"></p><div id="c-sem"></div></div>
     <div class="cols2">
       <div><h2 class="s">Cuatro canastas, no doce productos</h2><div class="bars" id="b-cat"></div></div>
       <div><h2 class="s">Ingreso y margen por canasta</h2><div class="scroll" id="t-cat"></div></div>
@@ -145,6 +193,12 @@ tfoot td { border-top: 2px solid var(--ink); border-bottom: 0; font-weight: 700;
       <div><h2 class="s">Ingreso día por día</h2><p class="sub" id="dia-sub"></p><div id="c-dia"></div></div>
     </div>
     <div><h2 class="s">Semana contra semana</h2><div class="scroll" id="t-sem"></div></div>
+    <div><h2 class="s">Comparar dos semanas, producto por producto</h2>
+      <div class="pares"><label class="f">Semana A<select id="wa"></select></label><label class="f">Semana B<select id="wb"></select></label></div>
+      <p class="sub" id="comp-sub" style="margin-top:12px"></p>
+      <div class="scroll" id="t-comp"></div>
+    </div>
+    <details class="hist" id="hist"><summary>Historial día por día: qué días faltan</summary><p class="hist-sub" id="hist-sub"></p><div class="scroll" id="t-hist"></div></details>
   </section>
 
   <section class="panel" id="p-productos" role="tabpanel" aria-labelledby="t-productos" hidden>
@@ -154,6 +208,7 @@ tfoot td { border-top: 2px solid var(--ink); border-bottom: 0; font-weight: 700;
   </section>
 
   <section class="panel" id="p-pedido" role="tabpanel" aria-labelledby="t-pedido" hidden>
+    <div class="acciones"><button class="btn sm" id="presentar" type="button">Modo presentación</button><button class="btn ghost sm" id="imprimir-btn" type="button">Imprimir lista de compras</button></div>
     <div><h2 class="s">Cuatro decisiones de pedido</h2><ul class="read" id="decisiones"></ul></div>
     <div>
       <h2 class="s">Cuánto pedir la próxima semana</h2>
@@ -171,17 +226,45 @@ tfoot td { border-top: 2px solid var(--ink); border-bottom: 0; font-weight: 700;
 
   <p class="foot" id="foot"></p>
 </main>
+
+<div class="present" id="present" role="dialog" aria-modal="true" aria-labelledby="pres-h" hidden>
+  <div class="in">
+    <h2 id="pres-h">Pedido de la semana</h2>
+    <p class="sub2" id="pres-sub"></p>
+    <ul class="pl" id="pres-body"></ul>
+    <div class="pt-grid" id="pres-tot"></div>
+    <p class="pt-off" id="pres-off"></p>
+  </div>
+  <button class="btn ghost x" id="pres-x" type="button">Cerrar (Esc)</button>
+</div>
+
+<div id="imprimir" aria-hidden="true"></div>
 <div class="toast" id="toast" hidden></div>
 
-<script src="config.js?v=3"></script>
-<script src="demo-data.js?v=3"></script>
-<script src="lib.js?v=3"></script>
-<script src="analisis.js?v=3"></script>
+<script src="config.js?v=4"></script>
+<script src="demo-data.js?v=4"></script>
+<script src="lib.js?v=4"></script>
+<script src="analisis.js?v=4"></script>
+<script>
+(function () {
+  "use strict";
+  var TEMAS = { auto: "Tema: automático", light: "Tema: claro", dark: "Tema: oscuro" };
+  function temaActual() { return document.documentElement.getAttribute("data-theme") || "auto"; }
+  function pintaTema() { document.getElementById("tema").textContent = TEMAS[temaActual()]; }
+  document.getElementById("tema").addEventListener("click", function () {
+    var sig = { auto: "light", light: "dark", dark: "auto" }[temaActual()] || "auto";
+    if (sig === "auto") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", sig);
+    try { if (sig === "auto") localStorage.removeItem("md-tema"); else localStorage.setItem("md-tema", sig); } catch (e) {}
+    pintaTema();
+  });
+  pintaTema();
+})();
+</script>
 <script>
 (function () {
   "use strict";
   var $ = function (id) { return document.getElementById(id); }, X = window.MD, esc = X.esc, money = X.money, sum = X.sum, DIAS = X.ORDEN_DIAS;
-  var data, loadedAt, A, Q;
+  var data, loadedAt, A, Q, PN = {}, pedidoRows = [];
   $("negocio").textContent = X.CFG.NEGOCIO || "El cuaderno del tendero, leído";
 
   function toast(t) { var e = $("toast"); e.textContent = t; e.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(function () { e.hidden = true; }, 3000); }
@@ -211,6 +294,34 @@ tfoot td { border-top: 2px solid var(--ink); border-bottom: 0; font-weight: 700;
   function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
   function lista(a) { return a.length <= 1 ? (a[0] || "") : a.slice(0, -1).join(", ") + " y " + a[a.length - 1]; }
   function pc(a, b) { return b ? Math.round(a * 100 / b) : 0; }
+  function nombreProd(nk) { return PN[nk] || cap(nk); }
+  function semTxt(k) { return "Del " + X.fmtDate(k) + " al " + X.fmtDate(X.addDays(k, 6)); }
+  function unidadesTxt(n) { return (Math.round(n * 10) / 10).toLocaleString("es-CO"); }
+
+  /* Ventas por semana: barras (las semanas incompletas, más claras) y la línea de tendencia */
+  function renderSemanas() {
+    var keys = A.semKeys, n = keys.length;
+    if (!n) { $("c-sem").innerHTML = ""; $("sem-sub").textContent = ""; return; }
+    var full = keys.filter(function (k) { return Object.keys(A.sem[k].dias).length === 7; });
+    var base = full.length >= 2 ? full : keys, W = 600, H = 230, pb = 36, pt = 16, yH = H - pb - pt;
+    var xs = base.map(function (k) { return keys.indexOf(k); }), ys = base.map(function (k) { return A.sem[k].ing; });
+    var mx = xs.reduce(function (a, x) { return a + x; }, 0) / xs.length, my = ys.reduce(function (a, y) { return a + y; }, 0) / ys.length;
+    var num = 0, den = 0; xs.forEach(function (x, i) { num += (x - mx) * (ys[i] - my); den += (x - mx) * (x - mx); });
+    var b = den ? num / den : 0, a0 = my - b * mx;
+    var top = Math.max.apply(null, ys.concat([a0, a0 + b * (n - 1), 1])), bw = (W - 10) / n;
+    var yOf = function (v) { return H - pb - Math.max(0, v) * yH / top; };
+    var bars = keys.map(function (k, i) {
+      var s = A.sem[k], nd = Object.keys(s.dias).length, h = s.ing * yH / top, x = 5 + i * bw;
+      return '<rect class="bar' + (nd < 7 ? " parc" : "") + '" x="' + (x + bw * .14).toFixed(1) + '" y="' + (H - pb - h).toFixed(1) + '" width="' + (bw * .72).toFixed(1) + '" height="' + h.toFixed(1) + '" rx="3"><title>' + semTxt(k) + ": " + money(s.ing) + " · " + nd + (nd === 1 ? " día" : " días") + "</title></rect>" +
+        '<text x="' + (x + bw / 2).toFixed(1) + '" y="' + (H - 12) + '" text-anchor="middle">' + X.fmtDate(k) + "</text>";
+    }).join("");
+    var x0 = bw / 2, x1 = 5 + (n - 1) * bw + bw / 2, tl = '<line class="trend" x1="' + x0.toFixed(1) + '" x2="' + x1.toFixed(1) + '" y1="' + yOf(a0).toFixed(1) + '" y2="' + yOf(a0 + b * (n - 1)).toFixed(1) + '"/>';
+    $("c-sem").innerHTML = '<div style="max-width:' + Math.min(680, 90 * n + 60) + 'px"><svg class="colchart" viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Ingreso por semana con línea de tendencia">' +
+      '<line x1="0" x2="' + W + '" y1="' + (H - pb) + '" y2="' + (H - pb) + '" stroke="var(--line)"/>' + bars + tl + "</svg></div>";
+    var dir = Math.abs(b) < 1 ? "plana" : (b > 0 ? "sube" : "baja") + " unos " + money(Math.abs(b)) + " por semana";
+    $("sem-sub").innerHTML = "Barras: ingreso de cada semana (lunes a domingo). Línea discontinua: la tendencia, que está " + dir + ". " +
+      (n < 3 ? "Con menos de tres semanas es solo una pista." : "") + (full.length >= 2 && full.length < n ? " Las semanas incompletas aparecen claras y no cuentan para la tendencia." : "");
+  }
 
   function renderResumen() {
     var mgp = A.ing ? (Math.round(A.margen * 1000 / A.ing) / 10).toLocaleString("es-CO") : "0";
@@ -221,7 +332,7 @@ tfoot td { border-top: 2px solid var(--ink); border-bottom: 0; font-weight: 700;
     ].map(function (x) { return "<div><small>" + x[0] + "</small><b>" + x[1] + "</b><span>" + x[2] + "</span></div>"; }).join("");
 
     var L = [], cats = Object.keys(A.cat).sort(function (a, b) { return A.cat[b].ing - A.cat[a].ing; });
-    if (!A.n) { $("lectura").innerHTML = "<li>No hay ventas en este periodo. Cambia las fechas o registra un día.</li>"; ["b-cat", "t-cat", "b-dow", "c-dia", "t-sem"].forEach(function (id) { $(id).innerHTML = ""; }); return; }
+    if (!A.n) { $("lectura").innerHTML = "<li>No hay ventas en este periodo. Cambia las fechas o registra un día.</li>"; ["c-sem", "b-cat", "t-cat", "b-dow", "c-dia", "t-sem", "t-comp", "t-hist"].forEach(function (id) { $(id).innerHTML = ""; }); $("sem-sub").textContent = ""; $("comp-sub").textContent = ""; $("hist-sub").textContent = ""; return; }
     L.push("En <b>" + A.nDias + (A.nDias === 1 ? " día" : " días") + "</b> el cuaderno sumó <b>" + money(A.ing) + "</b>. El margen, antes de arriendo, servicios y el trabajo del dueño, fue <b>" + money(A.margen) + "</b> (" + mgp + " %). Ese margen no es ganancia: es lo que queda para pagar todo lo demás.");
     var top = cats[0]; L.push("<b>" + esc(top) + "</b> es la canasta que más ingresó: " + money(A.cat[top].ing) + ", el " + pc(A.cat[top].ing, A.ing) + " % del total.");
     var gap = cats.map(function (c) { return { c: c, d: pc(A.cat[c].margen, A.margen) - pc(A.cat[c].ing, A.ing) }; }).sort(function (a, b) { return b.d - a.d; })[0];
@@ -230,38 +341,76 @@ tfoot td { border-top: 2px solid var(--ink); border-bottom: 0; font-weight: 700;
     if (dw.length > 1) L.push("El <b>" + dw[0].d.toLowerCase() + "</b> es el día más fuerte (" + money(dw[0].avg) + " en promedio) y el <b>" + dw[dw.length - 1].d.toLowerCase() + "</b> el más flojo (" + money(dw[dw.length - 1].avg) + ").");
     var pau = A.prod.filter(function (p) { return p.estado === "Pausar"; });
     if (pau.length) L.push("<b>" + pau.length + (pau.length === 1 ? " producto" : " productos") + " casi no rota" + (pau.length === 1 ? "" : "n") + "</b> (" + lista(pau.map(function (p) { return esc(p.producto); })) + "): juntos son el " + pc(sum(pau, function (p) { return p.ing; }), A.ing) + " % del ingreso. Ocupan plata y estante.");
+    if (A.sinRegistro.length) L.push("Faltan <b>" + A.sinRegistro.length + (A.sinRegistro.length === 1 ? " día" : " días") + "</b> por registrar entre el " + X.fmtDate(A.desde) + " y el " + X.fmtDate(A.hasta) + ". Ver el historial más abajo.");
     $("lectura").innerHTML = L.map(function (t) { return "<li>" + t + "</li>"; }).join("");
 
-    $("b-cat").innerHTML = bars(cats.map(function (c, i) { return { l: c, sub: pc(A.cat[c].ing, A.ing) + " % del ingreso", v: A.cat[c].ing }; }), { money: true });
+    renderSemanas();
+    $("b-cat").innerHTML = bars(cats.map(function (c) { return { l: c, sub: pc(A.cat[c].ing, A.ing) + " % del ingreso", v: A.cat[c].ing }; }), { money: true });
     $("t-cat").innerHTML = '<table><thead><tr><th>Canasta</th><th class="r xs-hide">Unidades</th><th class="r">Ingreso</th><th class="r">% ingreso</th><th class="r">Margen</th><th class="r xs-hide">% margen</th></tr></thead><tbody>' +
       cats.map(function (c) { var o = A.cat[c]; return "<tr><td><b>" + esc(c) + '</b></td><td class="r xs-hide">' + o.uni + '</td><td class="r">' + money(o.ing) + '</td><td class="r">' + pc(o.ing, A.ing) + ' %</td><td class="r">' + money(o.margen) + '</td><td class="r xs-hide">' + pc(o.margen, A.margen) + " %</td></tr>"; }).join("") +
-      '</tbody><tfoot><tr><td>Total</td><td class="r">' + A.uni + '</td><td class="r">' + money(A.ing) + '</td><td class="r">100 %</td><td class="r">' + money(A.margen) + '</td><td class="r">100 %</td></tr></tfoot></table>';
+      '</tbody><tfoot><tr><td>Total</td><td class="r xs-hide">' + A.uni + '</td><td class="r">' + money(A.ing) + '</td><td class="r">100 %</td><td class="r">' + money(A.margen) + '</td><td class="r xs-hide">100 %</td></tr></tfoot></table>';
 
     $("b-dow").innerHTML = bars(DIAS.filter(function (d) { return Object.keys(A.dow[d].fechas).length; }).map(function (d) { var n = Object.keys(A.dow[d].fechas).length; return { l: d, sub: n + (n === 1 ? " día" : " días"), v: Math.round(A.dow[d].ing / n), amber: d === "Viernes" || d === "Sábado" }; }), { money: true });
 
     var keys = A.fechas, mx = Math.max.apply(null, keys.map(function (k) { return A.dia[k]; })), W = 600, H = 190, pb = 22, bw = (W - 10) / keys.length;
     $("dia-sub").textContent = "Cada columna es un día. Pasa el cursor para ver el valor.";
     $("c-dia").innerHTML = '<svg class="colchart" viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Ingreso por día">' +
-      '<line x1="0" x2="' + W + '" y1="' + (H - pb) + '" y2="' + (H - pb) + '" stroke="#b7cbc5"/>' +
+      '<line x1="0" x2="' + W + '" y1="' + (H - pb) + '" y2="' + (H - pb) + '" stroke="var(--line)"/>' +
       keys.map(function (k, i) { var h = Math.round(A.dia[k] * (H - pb - 16) / mx), dn = X.dayName(k), fin = dn === "Viernes" || dn === "Sábado"; return '<rect class="bar' + (fin ? " fin" : "") + '" x="' + (5 + i * bw + bw * .12) + '" y="' + (H - pb - h) + '" width="' + (bw * .76) + '" height="' + h + '" rx="2"><title>' + dn + " " + X.fmtDate(k) + ": " + money(A.dia[k]) + '</title></rect><text x="' + (5 + i * bw + bw / 2) + '" y="' + (H - 6) + '" text-anchor="middle">' + dn.charAt(0) + "</text>"; }).join("") + "</svg>";
 
     var prev = null;
     $("t-sem").innerHTML = '<table><thead><tr><th>Semana</th><th class="r">Días</th><th class="r xs-hide">Unidades</th><th class="r">Ingreso</th><th class="r xs-hide">Margen</th><th class="r">Cambio</th></tr></thead><tbody>' +
-      A.semKeys.map(function (k) { var s = A.sem[k], nd = Object.keys(s.dias).length, ch = prev == null ? "—" : (prev === s.ing ? "igual al peso" : (s.ing > prev ? "+" : "−") + Math.abs(Math.round((s.ing - prev) * 100 / prev)) + " %"); prev = s.ing; return "<tr><td>Del " + X.fmtDate(k) + " al " + X.fmtDate(X.addDays(k, 6)) + '</td><td class="r">' + nd + '</td><td class="r xs-hide">' + s.uni + '</td><td class="r">' + money(s.ing) + '</td><td class="r xs-hide">' + money(s.margen) + '</td><td class="r">' + ch + "</td></tr>"; }).join("") + "</tbody></table>";
+      A.semKeys.map(function (k) { var s = A.sem[k], nd = Object.keys(s.dias).length, ch = prev == null ? "—" : (prev === s.ing ? "igual al peso" : (s.ing > prev ? '<span class="up">+' : '<span class="down">−') + Math.abs(Math.round((s.ing - prev) * 100 / prev)) + " %</span>"); prev = s.ing; return "<tr><td>" + semTxt(k) + '</td><td class="r">' + nd + '</td><td class="r xs-hide">' + s.uni + '</td><td class="r">' + money(s.ing) + '</td><td class="r xs-hide">' + money(s.margen) + '</td><td class="r">' + ch + "</td></tr>"; }).join("") + "</tbody></table>";
+
+    renderComparar(); renderHist();
+  }
+
+  /* Comparar dos semanas, producto por producto */
+  function semProd(k) { var o = {}, mp = A.sem[k].mapa; Object.keys(mp).forEach(function (key) { var nm = key.slice(key.indexOf("|") + 1); o[nm] = (o[nm] || 0) + mp[key]; }); return o; }
+  function renderComparar() {
+    var keys = A.semKeys, wa = $("wa"), wb = $("wb"), prevA = wa.value, prevB = wb.value;
+    var opts = keys.map(function (k) { return '<option value="' + k + '">' + semTxt(k) + "</option>"; }).join("");
+    wa.innerHTML = opts; wb.innerHTML = opts;
+    wa.value = keys.indexOf(prevA) >= 0 ? prevA : keys[Math.max(0, keys.length - 2)];
+    wb.value = keys.indexOf(prevB) >= 0 ? prevB : keys[keys.length - 1];
+    if (keys.length < 2) { $("comp-sub").textContent = "Necesitas al menos dos semanas con registro para comparar."; $("t-comp").innerHTML = ""; return; }
+    var ka = wa.value, kb = wb.value, pa = semProd(ka), pb = semProd(kb), nk = {};
+    Object.keys(pa).concat(Object.keys(pb)).forEach(function (k) { nk[k] = 1; });
+    var filas = Object.keys(nk).sort(function (x, y) { return (pb[y] || 0) - (pb[x] || 0) || (pa[y] || 0) - (pa[x] || 0); });
+    var sa = A.sem[ka], sb = A.sem[kb], cambio = sa.ing ? Math.round((sb.ing - sa.ing) * 100 / sa.ing) : null;
+    $("comp-sub").innerHTML = ka === kb ? "Elegiste la misma semana dos veces. Elige otra en la columna de la derecha." :
+      "Ingreso de la semana B: " + money(sb.ing) + (cambio == null ? "" : ", " + (cambio >= 0 ? "+" : "−") + Math.abs(cambio) + " % frente a la A") + ". Diferencia en unidades: verde si sube, rojo si baja.";
+    $("t-comp").innerHTML = '<table><thead><tr><th>Producto</th><th class="r">Semana A</th><th class="r">Semana B</th><th class="r">Diferencia</th></tr></thead><tbody>' +
+      filas.map(function (k) { var a = pa[k] || 0, b = pb[k] || 0, d = b - a; return "<tr><td><b>" + esc(nombreProd(k)) + '</b></td><td class="r">' + unidadesTxt(a) + '</td><td class="r">' + unidadesTxt(b) + '</td><td class="r ' + (d > 0 ? "up" : d < 0 ? "down" : "") + '">' + (d > 0 ? "+" : d < 0 ? "−" : "") + unidadesTxt(Math.abs(d)) + "</td></tr>"; }).join("") +
+      '</tbody><tfoot><tr><td>Total en unidades</td><td class="r">' + sa.uni + '</td><td class="r">' + sb.uni + '</td><td class="r">' + (sb.uni - sa.uni > 0 ? "+" : sb.uni - sa.uni < 0 ? "−" : "") + Math.abs(sb.uni - sa.uni) + "</td></tr>" +
+      '<tr><td>Ingreso</td><td class="r">' + money(sa.ing) + '</td><td class="r">' + money(sb.ing) + '</td><td class="r">' + (sb.ing - sa.ing >= 0 ? "+" : "−") + money(Math.abs(sb.ing - sa.ing)) + "</td></tr></tfoot></table>";
+  }
+  ["wa", "wb"].forEach(function (id) { $(id).addEventListener("change", function () { if (A && A.n) renderComparar(); }); });
+
+  /* Historial día por día, con los días sin registro marcados */
+  function renderHist() {
+    var cnt = {}; A.rows.forEach(function (v) { var c = cnt[v.fecha] || (cnt[v.fecha] = { l: 0, u: 0, i: 0 }); c.l++; c.u += v.unidades; c.i += v.ingreso; });
+    var filas = [];
+    for (var i = 0; i < A.diasRango; i++) {
+      var d = X.addDays(A.desde, i), c = cnt[d];
+      filas.push("<tr" + (c ? "" : ' class="falta"') + "><td>" + X.fmtDate(d) + "</td><td>" + X.dayName(d) + "</td>" +
+        (c ? '<td class="r">' + c.l + '</td><td class="r xs-hide">' + c.u + '</td><td class="r">' + money(c.i) + "</td><td>Registrado</td>" : '<td class="r">—</td><td class="r xs-hide">—</td><td class="r">—</td><td>Sin registro</td>') + "</tr>");
+    }
+    $("hist-sub").textContent = A.sinRegistro.length ? "Faltan " + A.sinRegistro.length + (A.sinRegistro.length === 1 ? " día" : " días") + " de " + A.diasRango + ". Confirma si no hubo ventas o si faltó anotar; no se rellenan con promedios." : "Todos los días del periodo tienen registro.";
+    $("t-hist").innerHTML = '<table><thead><tr><th>Fecha</th><th>Día</th><th class="r">Líneas</th><th class="r xs-hide">Unidades</th><th class="r">Ingreso</th><th>Estado</th></tr></thead><tbody>' + filas.join("") + "</tbody></table>";
   }
 
   function renderProductos() {
     if (!A.n) { $("t-prod").innerHTML = ""; $("t-heat").innerHTML = ""; $("reglas").textContent = ""; return; }
     var C = X.CFG;
     $("t-prod").innerHTML = '<table><thead><tr><th>Producto</th><th>Canasta</th><th class="r">Unidades</th><th class="r">Por semana</th><th class="r">Ingreso</th><th class="r">Margen</th><th class="r">Margen %</th><th class="r">Días con venta</th><th class="r">Vie + sáb</th><th>Día pico</th><th>Qué hacer</th></tr></thead><tbody>' +
-      A.prod.map(function (p) { return "<tr><td><b>" + esc(p.producto) + "</b></td><td>" + esc(p.categoria) + '</td><td class="r">' + p.uni + '</td><td class="r">' + (Math.round(p.semana * 10) / 10).toLocaleString("es-CO") + '</td><td class="r">' + money(p.ing) + '</td><td class="r">' + money(p.margen) + '</td><td class="r">' + Math.round(p.mgPct) + ' %</td><td class="r">' + Math.round(p.pctDias) + ' %</td><td class="r">' + Math.round(p.pctFinde) + ' %</td><td>' + esc(p.pico) + "</td><td>" + badge(p.estado) + "</td></tr>"; }).join("") + "</tbody></table>";
+      A.prod.map(function (p) { return "<tr><td><b>" + esc(p.producto) + "</b></td><td>" + esc(p.categoria) + '</td><td class="r">' + p.uni + '</td><td class="r">' + unidadesTxt(p.semana) + '</td><td class="r">' + money(p.ing) + '</td><td class="r">' + money(p.margen) + '</td><td class="r">' + Math.round(p.mgPct) + ' %</td><td class="r">' + Math.round(p.pctDias) + ' %</td><td class="r">' + Math.round(p.pctFinde) + ' %</td><td>' + esc(p.pico) + "</td><td>" + badge(p.estado) + "</td></tr>"; }).join("") + "</tbody></table>";
     $("reglas").innerHTML = "Cómo se decide “qué hacer” (se cambia en config.js): <b>Pausar un pedido</b> si vende " + (C.QUIETO_MAX_SEMANA == null ? 4 : C.QUIETO_MAX_SEMANA) + " unidades por semana o menos. <b>Reforzar viernes</b> si al menos el " + (C.FIN_DE_SEMANA_PCT == null ? 37 : C.FIN_DE_SEMANA_PCT) + " % de sus unidades salen viernes y sábado (parejo sería 29 %). <b>No puede faltar</b> si se vendió al menos el " + (C.DIARIO_PCT == null ? 90 : C.DIARIO_PCT) + " % de los días y no pesa más el fin de semana. El resto es <b>Normal</b>. Un producto sin ventas en el periodo aparece como <b>Sin ventas aún</b> y no entra al pedido.";
     var mx = 1; A.prod.forEach(function (p) { p.dow.forEach(function (v) { if (v > mx) mx = v; }); });
     $("t-heat").innerHTML = '<table class="heat"><thead><tr><th>Producto</th>' + DIAS.map(function (d) { return "<th>" + d.slice(0, 3) + "</th>"; }).join("") + '</tr></thead><tbody>' +
-      A.prod.map(function (p) { var m = Math.max(Math.max.apply(null, p.dow), 6); return "<tr><td>" + esc(p.producto) + "</td>" + p.dow.map(function (v, i) { var a = v / m; return '<td class="h" style="background:rgba(31,138,112,' + (0.06 + a * 0.72).toFixed(2) + ");color:" + (a > .55 ? "#fff" : "#163038") + '" title="' + esc(p.producto) + ", " + DIAS[i] + ": " + v + ' unidades">' + v + "</td>"; }).join("") + "</tr>"; }).join("") + "</tbody></table>";
+      A.prod.map(function (p) { var m = Math.max(Math.max.apply(null, p.dow), 6); return "<tr><td>" + esc(p.producto) + "</td>" + p.dow.map(function (v, i) { var a = v / m; return '<td class="h" style="background:rgba(31,138,112,' + (0.06 + a * 0.72).toFixed(2) + ");color:" + (a > .55 ? "#fff" : "var(--ink-2)") + '" title="' + esc(p.producto) + ", " + DIAS[i] + ": " + v + ' unidades">' + v + "</td>"; }).join("") + "</tr>"; }).join("") + "</tbody></table>";
   }
 
-  var pedidoRows = [];
   function renderPedido() {
     if (!A.n) { $("t-pedido-t").innerHTML = ""; $("decisiones").innerHTML = ""; $("pedido-base").textContent = ""; pedidoRows = []; return; }
     var col = Math.max(0, Math.min(100, +$("colchon").value || 0)) / 100, mult = 1 + col;
@@ -269,36 +418,79 @@ tfoot td { border-top: 2px solid var(--ink); border-bottom: 0; font-weight: 700;
       var pausar = p.estado === "Pausar" || p.estado === "Sin ventas", a = pausar ? 0 : Math.ceil(p.lunJue * mult), b = pausar ? 0 : Math.ceil(p.vieDom * mult);
       return { p: p, a: a, b: b, tot: a + b, pausa: pausar };
     });
-    var semTxt = A.semanasN === 1 ? "1 semana" : (Math.round(A.semanasN * 10) / 10).toLocaleString("es-CO") + " semanas";
+    var semT = A.semanasN === 1 ? "1 semana" : unidadesTxt(A.semanasN) + " semanas";
     var rep = Q.filter(function (c) { return c.titulo === "Semanas distintas entre sí" && c.nivel === "revisar"; })[0];
-    $("pedido-base").innerHTML = "Base: promedio por semana de lo vendido entre el " + X.fmtDate(A.desde) + " y el " + X.fmtDate(A.hasta) + " (" + semTxt + ")." + (rep ? ' <b style="color:#8f5a00">Ojo: hay semanas repetidas en los datos; si es un error de copia, este pedido se apoya en una sola semana real.</b> <a href="#" data-go="calidad">Ver revisión</a>' : "");
+    $("pedido-base").innerHTML = "Base: promedio por semana de lo vendido entre el " + X.fmtDate(A.desde) + " y el " + X.fmtDate(A.hasta) + " (" + semT + ")." + (rep ? ' <b style="color:var(--warn)">Ojo: hay semanas repetidas en los datos; si es un error de copia, este pedido se apoya en una sola semana real.</b> <a href="#" data-go="calidad">Ver revisión</a>' : "");
     $("t-pedido-t").innerHTML = '<table><thead><tr><th>Producto</th><th>Qué hacer</th><th class="r">Lunes a jueves</th><th class="r">Viernes a domingo</th><th class="r">Total de la semana</th></tr></thead><tbody>' +
       pedidoRows.map(function (r) { return "<tr><td><b>" + esc(r.p.producto) + "</b></td><td>" + badge(r.p.estado) + '</td><td class="r">' + (r.pausa ? "—" : r.a) + '</td><td class="r">' + (r.pausa ? "—" : r.b) + '</td><td class="r"><b>' + (r.pausa ? (r.p.estado === "Sin ventas" ? "0 · sin ventas" : "0 · pausar") : r.tot) + "</b></td></tr>"; }).join("") + "</tbody></table>";
 
-    var sinV = A.prod.filter(function (p) { return p.estado === "Sin ventas"; }); var firmes = A.prod.filter(function (p) { return p.estado === "Firme"; }), ref = A.prod.filter(function (p) { return p.estado === "Reforzar"; }), pau = A.prod.filter(function (p) { return p.estado === "Pausar"; });
+    var sinV = A.prod.filter(function (p) { return p.estado === "Sin ventas"; }), firmes = A.prod.filter(function (p) { return p.estado === "Firme"; }), ref = A.prod.filter(function (p) { return p.estado === "Reforzar"; }), pau = A.prod.filter(function (p) { return p.estado === "Pausar"; });
     var D = [];
     if (firmes.length) D.push("<b>" + cap(lista(firmes.map(function (p) { return p.producto; }))) + " se piden antes que cualquier promoción.</b> Se vendieron casi todos los días y su venta no depende del fin de semana: son el " + pc(sum(firmes, function (p) { return p.ing; }), A.ing) + " % del ingreso.");
     if (ref.length) { var ra = sum(ref, function (p) { return p.lunJue; }), rb = sum(ref, function (p) { return p.vieDom; }); D.push("<b>" + cap(lista(ref.map(function (p) { return p.producto; }))) + " se refuerzan el viernes, no el lunes.</b> En promedio salen " + Math.round(ra) + " unidades de lunes a jueves y " + Math.round(rb) + " de viernes a domingo: el pedido del viernes debe ser más alto que el del martes."); }
-    if (pau.length) D.push("<b>" + cap(lista(pau.map(function (p) { return p.producto; }))) + " se pausan un pedido.</b> Salen " + lista(pau.map(function (p) { return esc(p.producto) + " " + (Math.round(p.semana * 10) / 10).toLocaleString("es-CO"); })) + " unidades por semana: no se reponen hasta ver otra semana igual.");
+    if (pau.length) D.push("<b>" + cap(lista(pau.map(function (p) { return p.producto; }))) + " se pausan un pedido.</b> Salen " + lista(pau.map(function (p) { return esc(p.producto) + " " + unidadesTxt(p.semana); })) + " unidades por semana: no se reponen hasta ver otra semana igual.");
     if (sinV.length) D.push("<b>" + cap(lista(sinV.map(function (p) { return p.producto; }))) + (sinV.length === 1 ? " no tiene" : " no tienen") + " ventas todavía.</b> No entran al pedido hasta que se registre al menos un día con ese producto.");
     D.push("<b>Con " + A.nDias + (A.nDias === 1 ? " día" : " días") + " no se promete el mes.</b> Se promete el pedido de la otra semana, y se vuelve a leer cuando haya más datos.");
     $("decisiones").innerHTML = D.map(function (t) { return "<li>" + t + "</li>"; }).join("");
   }
   $("colchon").addEventListener("input", function () { if (A) renderPedido(); });
+
   $("copiar-pedido").addEventListener("click", function () {
     if (!pedidoRows.length) return;
-    var t = "Pedido sugerido · semana siguiente (" + (X.CFG.NEGOCIO || "") + ")\n" + pedidoRows.filter(function (r) { return r.p.estado !== "Pausar"; }).map(function (r) { return "- " + r.p.producto + ": " + r.tot + " (lun-jue " + r.a + " · vie-dom " + r.b + ")"; }).join("\n") +
+    var t = "Pedido sugerido · semana siguiente (" + (X.CFG.NEGOCIO || "") + ")\n" + pedidoRows.filter(function (r) { return r.p.estado !== "Pausar" && r.p.estado !== "Sin ventas"; }).map(function (r) { return "- " + r.p.producto + ": " + r.tot + " (lun-jue " + r.a + " · vie-dom " + r.b + ")"; }).join("\n") +
       "\nPausar este pedido: " + pedidoRows.filter(function (r) { return r.p.estado === "Pausar"; }).map(function (r) { return r.p.producto; }).join(", ");
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(function () { toast("Pedido copiado."); }, function () { toast("No se pudo copiar."); }); else toast("No se pudo copiar.");
   });
 
+  /* Lista de compras para imprimir */
+  $("imprimir-btn").addEventListener("click", function () {
+    if (!pedidoRows.length) { toast("Primero hay que tener ventas en el periodo."); return; }
+    var pedir = pedidoRows.filter(function (r) { return r.tot > 0 && r.p.estado !== "Pausar" && r.p.estado !== "Sin ventas"; });
+    var fuera = pedidoRows.filter(function (r) { return !(r.tot > 0 && r.p.estado !== "Pausar" && r.p.estado !== "Sin ventas"); }).map(function (r) { return r.p.producto; });
+    $("imprimir").innerHTML = '<h1>Lista de compras · semana siguiente</h1>' +
+      "<p>" + esc(X.CFG.NEGOCIO || "") + " · impreso el " + X.fmtDate(X.today()) + ". Base: " + A.nDias + (A.nDias === 1 ? " día" : " días") + " de ventas, del " + X.fmtDate(A.desde) + " al " + X.fmtDate(A.hasta) + ".</p>" +
+      '<table><thead><tr><th class="caja">✓</th><th>Producto</th><th class="r">Lun a jue</th><th class="r">Vie a dom</th><th class="r">Total</th><th>Pedido real</th></tr></thead><tbody>' +
+      pedir.map(function (r) { return '<tr><td class="caja">☐</td><td>' + esc(r.p.producto) + '</td><td class="r">' + r.a + '</td><td class="r">' + r.b + '</td><td class="r"><b>' + r.tot + '</b></td><td class="real"></td></tr>'; }).join("") +
+      "</tbody></table>" +
+      (fuera.length ? "<p><b>No pedir esta semana:</b> " + esc(fuera.join(", ")) + ".</p>" : "") +
+      (+$("colchon").value ? "<p>Incluye un colchón de seguridad del " + (+$("colchon").value) + " %.</p>" : "");
+    window.print();
+  });
+
+  /* Modo presentación: pantalla completa para proyectar en la reunión */
+  var pres = $("present");
+  function abrirPresentacion() {
+    if (!pedidoRows.length) { toast("Primero hay que tener ventas en el periodo."); return; }
+    $("pres-sub").textContent = "Base: " + A.nDias + (A.nDias === 1 ? " día" : " días") + " de ventas, del " + X.fmtDate(A.desde) + " al " + X.fmtDate(A.hasta) + (+$("colchon").value ? ". Colchón: " + (+$("colchon").value) + " %" : "") + ".";
+    $("pres-body").innerHTML = $("decisiones").innerHTML;
+    var pedir = pedidoRows.filter(function (r) { return r.tot > 0 && r.p.estado !== "Pausar" && r.p.estado !== "Sin ventas"; });
+    $("pres-tot").innerHTML = pedir.map(function (r) { return "<div><span>" + esc(r.p.producto) + "</span><b>" + r.tot + "</b></div>"; }).join("");
+    var off = pedidoRows.filter(function (r) { return !(r.tot > 0 && r.p.estado !== "Pausar" && r.p.estado !== "Sin ventas"); }).map(function (r) { return r.p.producto; });
+    $("pres-off").textContent = off.length ? "Sin pedido esta semana: " + off.join(", ") + "." : "";
+    pres.hidden = false; document.body.style.overflow = "hidden";
+    try { if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(function () {}); } catch (e) {}
+    $("pres-x").focus();
+  }
+  function cerrarPresentacion() {
+    pres.hidden = true; document.body.style.overflow = "";
+    try { if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(function () {}); } catch (e) {}
+    $("presentar").focus();
+  }
+  $("presentar").addEventListener("click", abrirPresentacion);
+  $("pres-x").addEventListener("click", cerrarPresentacion);
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !pres.hidden) cerrarPresentacion(); });
+
   function renderCalidad() {
     var ic = { ok: '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#146b52"/><path d="M6.5 12.5 10.5 16.5 17.5 8" fill="none" stroke="#fff" stroke-width="2.4"/></svg>',
       revisar: '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.5 23 21H1z" fill="#c98a0b"/><path d="M12 9v6" stroke="#fff" stroke-width="2.6"/><circle cx="12" cy="18" r="1.5" fill="#fff"/></svg>' };
-    var pend = Q.filter(function (c) { return c.nivel === "revisar"; }).length;
+    var pendL = Q.filter(function (c) { return c.nivel === "revisar"; }), pend = pendL.length;
     $("n-calidad").hidden = !pend; $("n-calidad").textContent = pend;
     $("chk").innerHTML = Q.map(function (c) { return '<div class="' + c.nivel + '">' + ic[c.nivel] + "<div><b>" + esc(c.titulo) + '<span class="pill ' + c.nivel + '">' + (c.nivel === "ok" ? "Bien" : "Revisar") + "</span></b><p>" + esc(c.detalle) + "</p></div></div>"; }).join("");
-    $("alertbar").innerHTML = pend ? '<div class="alertbar" role="status"><span><b>' + pend + (pend === 1 ? " revisión pendiente" : " revisiones pendientes") + " en los datos.</b> " + esc(Q.filter(function (c) { return c.nivel === "revisar"; })[0].titulo) + (pend > 1 ? " y " + (pend - 1) + " más." : ".") + '</span><button class="btn sm" type="button" data-go="calidad">Ver qué pasa</button></div>' : "";
+    var repetida = pendL.filter(function (c) { return c.titulo === "Semanas distintas entre sí"; })[0];
+    var primera = repetida || pendL[0];
+    $("alertbar").innerHTML = pend ? '<div class="alertbar" role="status"><span>' +
+      (repetida ? "<b>Semana repetida en los datos.</b> Hay semanas idénticas línea por línea: contrástalas con el cuaderno antes de confiar en el patrón semanal." : "<b>" + pend + (pend === 1 ? " revisión pendiente" : " revisiones pendientes") + ".</b> " + esc(primera.titulo) + (pend > 1 ? " y " + (pend - 1) + " más." : ".")) +
+      '</span><button class="btn sm" type="button" data-go="calidad">Ver qué pasa</button></div>' : "";
     $("t-reglas").innerHTML = '<table><thead><tr><th>Error del cuaderno</th><th>Regla</th><th>Dónde se aplica</th></tr></thead><tbody>' + [
       ["Mismo producto con tres nombres", "Lista cerrada de productos", "Registro: solo se eligen productos de la hoja Productos. Tablero: revisa los que están fuera."],
       ["Un sábado copiado dos veces", "Una fecha, una fila por producto", "Registro: guardar un día ya registrado lo reemplaza. Tablero: busca repetidas."],
@@ -320,6 +512,7 @@ tfoot td { border-top: 2px solid var(--ink); border-bottom: 0; font-weight: 700;
     $("periodo").textContent = "Cargando datos…";
     return X.loadData().then(function (d) {
       data = d; loadedAt = new Date().toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" }).replace(/\.$/, "");
+      PN = {}; d.prod.forEach(function (p) { PN[X.norm(p.producto)] = p.producto; });
       var av = d.avisos.slice(); if (d.modo === "demo" && !av.length) av.push("Estás viendo datos de demostración. Conecta las hojas de Google en config.js para ver los datos reales.");
       $("avisos").innerHTML = av.map(function (a) { return '<div class="banner' + (d.avisos.length ? " err" : "") + '" role="status">' + esc(a) + "</div>"; }).join("");
       var f = d.ven.map(function (v) { return v.fecha; }).filter(Boolean).sort(); if (f.length) { $("desde").min = $("hasta").min = f[0]; $("desde").max = $("hasta").max = f[f.length - 1]; }
