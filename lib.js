@@ -91,9 +91,16 @@
   /* Envía el día al script de Google. Siempre resuelve: { ok, ... } o { ok:false, red:true } si no hubo conexión. */
   function registrar(payload) {
     if (!CFG.REGISTRO) return Promise.resolve({ ok: false, sinConfig: true });
+    if (!/\/exec$/.test(CFG.REGISTRO)) return Promise.resolve({ ok: false, error: "El enlace de REGISTRO en config.js debe terminar en /exec (no en /dev ni en otra dirección)." });
     return fetch(CFG.REGISTRO, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload) })
-      .then(function (r) { return r.json(); })
-      .catch(function () { return { ok: false, red: true, error: "No hubo conexión con el registro." }; });
+      .catch(function () { return null; })
+      .then(function (r) {
+        if (!r) return { ok: false, red: true, error: "No llegó respuesta del script. Revisa en Apps Script: Implementar → Administrar implementaciones, que el acceso sea “Cualquier persona” y que hayas dado permiso con tu cuenta." };
+        return r.text().then(function (t) {
+          try { return JSON.parse(t); }
+          catch (e) { return { ok: false, error: "El script respondió algo que no es un resultado (probablemente pide iniciar sesión). Revisa que el acceso sea “Cualquier persona” y que la URL termine en /exec." }; }
+        });
+      });
   }
 
   w.MD = { norm: norm, esc: esc, money: money, toNum: toNum, sum: sum, pct: pct, today: today, parseDate: parseDate, fmtDate: fmtDate, dayName: dayName, addDays: addDays, mondayOf: mondayOf, ORDEN_DIAS: ORDEN_DIAS, parseCSV: parseCSV, loadData: loadData, registrar: registrar, CFG: CFG };
